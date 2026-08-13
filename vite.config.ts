@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -13,6 +13,16 @@ export default defineConfig({
     },
     // A duplicated three.js instance is a classic R3F failure mode.
     dedupe: ['three'],
+  },
+
+  /*
+    The suites cover pure logic only — reducers, beat maths, key resolution,
+    quality detection, content integrity. They run in Node with no DOM, which
+    is why nothing here imports a component.
+  */
+  test: {
+    include: ['src/**/*.test.ts'],
+    environment: 'node',
   },
 
   build: {
