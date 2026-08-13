@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="تجربة تفاعلية لتعلّم استخدام الـ AI بذكاء" />
+    <title>AI: كيف نستخدمه بذكاء؟</title>
+    <style>
+      /*
+        Painted before React mounts. Without this the projector shows a white
+        flash on load, which is very visible in a dark room.
+      */
+      html {
+        background-color: #05060f;
+      }
+      body {
+        margin: 0;
+        background-color: #05060f;
+        /* This is a presentation, not a scrolling page. */
+        overflow: hidden;
+        overscroll-behavior: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
