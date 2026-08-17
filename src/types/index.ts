@@ -8,6 +8,8 @@ export type {
   SceneType,
   RevealEmphasis,
   RevealStep,
+  GroupTone,
+  ContentGroup,
   SceneContent,
   SceneDef,
   PresentationState,

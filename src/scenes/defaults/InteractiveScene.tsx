@@ -1,7 +1,8 @@
 import { createElement } from 'react'
 import { getInteractionComponent } from '@/components/interactions/interactionRegistry'
-import { SectionTitle } from '@/components/ui'
+import { RevealText, SectionTitle } from '@/components/ui'
 import { INTERACTION_BY_ID } from '@/data/interactions'
+import { getBeatLayout } from '@/lib/beats'
 import type { SceneDef } from '@/types'
 
 /**
@@ -20,11 +21,13 @@ export function InteractiveScene({ scene }: { scene: SceneDef }) {
     ? getInteractionComponent(scene.interaction)
     : undefined
 
+  const layout = getBeatLayout(scene)
+  const { headline, subheadline, keyMessage } = scene.content
+
   return (
     <div className="flex h-full flex-col justify-center gap-10">
-      <SectionTitle eyebrow={scene.id}>
-        {scene.content.headline ?? scene.title}
-      </SectionTitle>
+      {/* No eyebrow: the chrome already names the world. */}
+      <SectionTitle lead={subheadline}>{headline ?? scene.title}</SectionTitle>
 
       {interaction && Interaction ? (
         createElement(Interaction, { scene, interaction })
@@ -32,6 +35,14 @@ export function InteractiveScene({ scene }: { scene: SceneDef }) {
         <p className="text-lead text-warning">
           ⟦ interaction “{scene.interaction}” — لسا ما انبنت ⟧
         </p>
+      )}
+
+      {/* The takeaway the interaction exists to produce, so it lands on the
+          final beat — after the class has answered, not while they decide. */}
+      {keyMessage && layout.keyMessageBeat !== null && (
+        <RevealText step={layout.keyMessageBeat} emphasis="strong">
+          {keyMessage}
+        </RevealText>
       )}
     </div>
   )

@@ -1,8 +1,13 @@
+import { readFileSync, readdirSync } from 'node:fs'
+
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { SCENES } from '@/data/scenes'
+import { SCENES, SCENE_BY_ID } from '@/data/scenes'
+import { getBeatLayout } from '@/lib/beats'
 import { getPollWeights } from '@/lib/pollWeights'
 import { getMindFormation } from '@/lib/mindFormation'
 import { INTERACTION_BY_ID } from '@/data/interactions'
+import { INTERACTION_IDS, SCENE_3D_IDS } from '@/types'
 
 describe('poll weights (World 1, Interaction A)', () => {
   it('rests level and low before anything is chosen', () => {
@@ -49,7 +54,7 @@ describe('poll weights (World 1, Interaction A)', () => {
 })
 
 describe('mind formation (World 2)', () => {
-  it.each(['not-a-mind-reader', 'context'])(
+  it.each(['not-mind-reader', 'context'])(
     'keeps the brain intact through %s',
     (sceneId) => {
       expect([0, 1, 2, 5].every((b) => getMindFormation(sceneId, b) === 0)).toBe(
@@ -58,10 +63,28 @@ describe('mind formation (World 2)', () => {
     },
   )
 
-  it('dissolves the brain on the second beat of AI مش سحر', () => {
-    expect(getMindFormation('not-magic', 0)).toBe(0)
-    expect(getMindFormation('not-magic', 1)).toBe(1)
-    expect(getMindFormation('not-magic', 4)).toBe(1)
+  /*
+    Derived from the layout, not pinned to a beat number. The previous version
+    asserted `beat 1 === lattice`, which stayed green when the deck added three
+    reveal steps and silently moved the dissolve three beats early — the mapping
+    was tested in isolation from the scene it describes.
+  */
+  it('holds the brain through the explanation, then dissolves it as the statement blooms', () => {
+    const scene = SCENE_BY_ID.get('not-magic')!
+    const { statementBeat, total } = getBeatLayout(scene)
+    expect(statementBeat).not.toBeNull()
+
+    for (let beat = 0; beat < statementBeat!; beat++) {
+      expect(getMindFormation('not-magic', beat), `beat ${beat}`).toBe(0)
+    }
+    for (let beat = statementBeat!; beat < total; beat++) {
+      expect(getMindFormation('not-magic', beat), `beat ${beat}`).toBe(1)
+    }
+  })
+
+  it('shows the brain for at least one beat — it must be seen to be broken', () => {
+    const scene = SCENE_BY_ID.get('not-magic')!
+    expect(getBeatLayout(scene).statementBeat).toBeGreaterThan(0)
   })
 
   it.each(['how-ai-works', 'why-ai-makes-mistakes'])(
@@ -84,6 +107,123 @@ describe('mind formation (World 2)', () => {
     expect(
       values.every((v) => Number.isFinite(v) && v >= 0 && v <= 1),
     ).toBe(true)
+  })
+})
+
+/**
+ * The 3D environments are laid out along X so moving between worlds is a real
+ * traversal. ExperienceCanvas anchors each world at its camera target, which
+ * means every world must be authored around its OWN local origin.
+ *
+ * A world that anchors itself as well lands at twice the offset and falls
+ * outside the frustum — a silently black screen, which is exactly how this was
+ * found on World 2. Nothing about a black backdrop fails typecheck, lint or any
+ * behavioural test, so the invariant is guarded structurally.
+ */
+describe('worlds stay in local coordinates', () => {
+  const dir = fileURLToPath(new URL('../components/three/worlds', import.meta.url))
+  const files = readdirSync(dir).filter((f) => f.endsWith('.tsx'))
+
+  it('finds the world modules', () => {
+    expect(files.length).toBeGreaterThan(0)
+  })
+
+  it.each(files)('%s does not position itself in world space', (file) => {
+    expect(readFileSync(`${dir}/${file}`, 'utf8')).not.toContain('getCameraPose')
+  })
+
+  it('does not let PlaceholderScene anchor itself either', () => {
+    const placeholder = fileURLToPath(
+      new URL('../components/three/PlaceholderScene.tsx', import.meta.url),
+    )
+    expect(readFileSync(placeholder, 'utf8')).not.toContain('getCameraPose')
+  })
+})
+
+/**
+ * An unbuilt interaction renders a visible "not built yet" note rather than
+ * crashing, which is right during construction and wrong on the day.
+ *
+ * Asserted against the registry's source text, not by importing it: these
+ * suites run in Node with no DOM, and importing the registry would drag in
+ * every interaction component, React and Motion — which tripled the run time
+ * when tried. Same technique as the local-coordinate guard above.
+ */
+/**
+ * A full-screen backdrop-blur costs 4–8ms a frame on integrated graphics,
+ * every frame, for 45 minutes — which is why the house surface is opaque. The
+ * `glass` variant exists for the dev gallery; this keeps it there.
+ */
+describe('no backdrop-blur reaches the presentation', () => {
+  const dir = fileURLToPath(new URL('../components', import.meta.url))
+
+  const walk = (from: string): string[] =>
+    readdirSync(from, { withFileTypes: true }).flatMap((entry) =>
+      entry.isDirectory()
+        ? walk(`${from}/${entry.name}`)
+        : entry.name.endsWith('.tsx')
+          ? [`${from}/${entry.name}`]
+          : [],
+    )
+
+  it('uses the glass surface nowhere but the dev gallery', () => {
+    const users = walk(dir)
+      .filter((file) => readFileSync(file, 'utf8').includes('surface="glass"'))
+      .map((file) => file.split(/[\\/]/).pop())
+
+    expect(users).toEqual(['ComponentGallery.tsx'])
+  })
+})
+
+/**
+ * Every 3D environment now has a real world behind it. `void` is the exception
+ * and stays one: it is the deliberate empty backdrop for a statement moment,
+ * not something waiting to be built.
+ */
+describe('3D registry coverage', () => {
+  const registry = readFileSync(
+    fileURLToPath(
+      new URL('../components/three/sceneRegistry.ts', import.meta.url),
+    ),
+    'utf8',
+  )
+
+  it('maps every environment to something other than the placeholder', () => {
+    const unbuilt = SCENE_3D_IDS.filter(
+      (id) => id !== 'void' && !new RegExp(`\\b${id}:`).test(registry),
+    )
+    expect(unbuilt).toEqual([])
+  })
+
+  it('leaves no scene rendering the placeholder', () => {
+    const placeholderOnly = SCENES.filter((s) => s.scene3d === 'void')
+    expect(placeholderOnly).toEqual([])
+  })
+})
+
+describe('interaction registry coverage', () => {
+  const registry = readFileSync(
+    fileURLToPath(
+      new URL(
+        '../components/interactions/interactionRegistry.ts',
+        import.meta.url,
+      ),
+    ),
+    'utf8',
+  )
+
+  it('builds every interaction the deck can support', () => {
+    const unbuilt = INTERACTION_IDS.filter(
+      (id) => !new RegExp(`['"]?${id}['"]?\\s*:`).test(registry),
+    )
+    // Real-or-Fake is blocked: the deck names the threats but supplies no pair
+    // to compare, so its two options are still TODO. See PROJECT-STATUS.md §7.
+    expect(unbuilt).toEqual(['real-or-fake'])
+  })
+
+  it('leaves the blocked one commented, not silently missing', () => {
+    expect(registry).toContain('real-or-fake')
+    expect(registry).toMatch(/blocked/i)
   })
 })
 
@@ -123,13 +263,16 @@ describe('World 2 shape', () => {
     expect(world2.every((s) => s.scene3d === 'aiMind')).toBe(true)
   })
 
-  it('gives the mind reader a statement plus four unanswerable possibilities', () => {
+  /* The deck answers the question outright rather than offering candidate
+     reasons to pick between. An earlier design fanned out four possibilities;
+     if they ever reappear, the deck did not put them there. */
+  it('gives the mind reader the statement and the deck’s flat answer', () => {
     const mindReader = INTERACTION_BY_ID['mind-reader']
     expect(mindReader.kind).toBe('reveal')
-    expect(mindReader.options[0].id).toBe('statement')
-    expect(mindReader.options).toHaveLength(5)
+    expect(mindReader.options.map((o) => o.id)).toEqual(['statement', 'answer'])
+    expect(mindReader.options[1].label).toBe('لا.')
     expect(
-      mindReader.options.some((o) => o.id === 'reveal-context'),
+      mindReader.options.some((o) => o.id.startsWith('possibility-')),
     ).toBe(false)
   })
 })

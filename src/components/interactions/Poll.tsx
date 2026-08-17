@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { motion } from 'motion/react'
 import { ChoiceCard, QuestionCard } from '@/components/ui'
 import { useChoiceKeys } from '@/hooks/useChoiceKeys'
+import { useInteractionReset } from '@/hooks/useInteractionReset'
 import { usePresentation } from '@/hooks/usePresentation'
 import { getBeatLayout } from '@/lib/beats'
 import { getPollWeights } from '@/lib/pollWeights'
@@ -33,16 +34,7 @@ export function Poll({ scene, interaction }: PollProps) {
     layout.interactionStart !== null && beat >= layout.interactionStart
 
   useChoiceKeys(setSelected, { count: interaction.options.length })
-
-  // Local Escape handling so the poll can be reset without disturbing the
-  // global key map.
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setSelected(null)
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  useInteractionReset(() => setSelected(null))
 
   const weights = getPollWeights(interaction.options.length, selected)
 

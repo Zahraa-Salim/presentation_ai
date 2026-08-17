@@ -163,7 +163,8 @@
   --z-canvas: 0;
   --z-scene: 10;
   --z-ui: 20;
-  --z-overlay: 30;
+  /* 30 is deliberately left free: a modal layer between the chrome and the
+     presenter panel, if one is ever needed. */
   --z-presenter: 40;
 }
 

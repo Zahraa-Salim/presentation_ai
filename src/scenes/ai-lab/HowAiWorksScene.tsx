@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { SectionTitle } from '@/components/ui'
+import { RevealText, SectionTitle } from '@/components/ui'
 import { AI_PIPELINE } from '@/data/aiPipeline'
 import { usePresentation } from '@/hooks/usePresentation'
 import { getBeatLayout } from '@/lib/beats'
@@ -22,9 +22,8 @@ export function HowAiWorksScene({ scene }: { scene: SceneDef }) {
 
   return (
     <div className="flex h-full flex-col justify-center gap-12">
-      <SectionTitle eyebrow={scene.id}>
-        {scene.content.headline ?? scene.title}
-      </SectionTitle>
+      {/* No eyebrow: the chrome already names the world. */}
+      <SectionTitle>{scene.content.headline ?? scene.title}</SectionTitle>
 
       <ol className="flex flex-wrap items-start gap-x-3 gap-y-8">
         {AI_PIPELINE.map((stage, index) => {
@@ -74,6 +73,14 @@ export function HowAiWorksScene({ scene }: { scene: SceneDef }) {
           )
         })}
       </ol>
+
+      {/* `AI بيتوقع، مش بيفكّر مثل الإنسان.` — the conclusion the five stages
+          exist to earn, so it lands only once they have all been shown. */}
+      {scene.content.keyMessage && layout.keyMessageBeat !== null && (
+        <RevealText step={layout.keyMessageBeat} emphasis="strong">
+          {scene.content.keyMessage}
+        </RevealText>
+      )}
     </div>
   )
 }

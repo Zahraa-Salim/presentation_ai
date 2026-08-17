@@ -1,0 +1,662 @@
+{
+  "meta": {
+    "title": "AI: كيف نستخدمه بذكاء؟",
+    "subtitle": "Interactive AI Education Experience",
+    "language": "ar",
+    "direction": "rtl",
+    "audience": "Grade 11 students in Lebanon",
+    "durationMinutes": 45,
+    "sceneCount": 33,
+    "coreMessage": "خلي AI يساعدك، مش يفكّر بدالك."
+  },
+  "contentStyle": {
+    "headlines": "Lebanese Arabic / conversational Arabic",
+    "novaVoice": "Lebanese Arabic / conversational Arabic",
+    "explanations": "Simple, clear Arabic",
+    "englishTerms": [
+      "AI",
+      "Prompt",
+      "Context",
+      "Machine Learning",
+      "Deep Learning",
+      "Generative AI",
+      "Cybersecurity",
+      "AI Literacy"
+    ]
+  },
+  "worlds": [
+    {
+      "id": "ai-world",
+      "title": "AI World",
+      "scenes": [
+        {
+          "id": "opening",
+          "number": 1,
+          "type": "title",
+          "title": "AI: كيف نستخدمه بذكاء؟",
+          "subtitle": "مش كيف نخليه يعمل كل شي عنّا.",
+          "speakerNotes": [
+            "اليوم مش جايين نتعلّم كيف نستخدم ChatGPT وبس.",
+            "بدنا نفهم AI، نعرف وين بيساعدنا، ووين لازم نوقف ونفكّر لحالنا."
+          ]
+        },
+        {
+          "id": "opening-poll",
+          "number": 2,
+          "type": "poll",
+          "title": "هل أنت تستخدم AI أم AI يستخدمك؟",
+          "question": "هل استخدمت AI من قبل؟",
+          "options": [
+            "نعم",
+            "أحياناً",
+            "أبداً"
+          ],
+          "reveal": "طيب… مين عم يستخدم مين؟",
+          "speakerNotes": [
+            "Presenter-controlled classroom interaction; no live voting backend."
+          ]
+        },
+        {
+          "id": "ai-is-everywhere",
+          "number": 3,
+          "type": "title",
+          "title": "AI صار حوالينا.",
+          "items": [
+            "الدراسة",
+            "الموبايل",
+            "الصور",
+            "الفيديو",
+            "البرمجة",
+            "البحث",
+            "الألعاب"
+          ],
+          "subtitle": "يمكن تستخدم AI كل يوم… من دون ما تنتبه."
+        },
+        {
+          "id": "ai-is-not-new",
+          "number": 4,
+          "type": "timeline",
+          "title": "AI مش جديد.",
+          "intro": "الفكرة أقدم بكتير من ChatGPT.",
+          "timeline": [
+            {
+              "id": "turing",
+              "year": 1950,
+              "title": "Turing Test",
+              "caption": "بدأت أسئلة جدية عن قدرة الآلة على محاكاة التفكير."
+            },
+            {
+              "id": "dartmouth",
+              "year": 1956,
+              "title": "Artificial Intelligence",
+              "caption": "ظهر مصطلح Artificial Intelligence."
+            },
+            {
+              "id": "deep-blue",
+              "year": 1997,
+              "title": "Deep Blue",
+              "caption": "كمبيوتر هزم بطل العالم بالشطرنج."
+            },
+            {
+              "id": "deep-learning",
+              "year": 2012,
+              "title": "Deep Learning",
+              "caption": "التعلّم من كميات ضخمة من البيانات صار أقوى."
+            },
+            {
+              "id": "chatgpt",
+              "year": 2022,
+              "title": "ChatGPT",
+              "caption": "Generative AI صار متاحاً لجمهور واسع."
+            }
+          ]
+        },
+        {
+          "id": "ai-is-not-a-trend",
+          "number": 5,
+          "type": "title",
+          "title": "AI مش Trend.",
+          "subtitle": "مش موجة وبتروح.",
+          "body": "AI عم يدخل أكثر بحياتنا ودراستنا وشغلنا.",
+          "question": "السؤال مش: هل AI رح يختفي؟",
+          "answer": "السؤال: هل رح نعرف نستخدمه؟"
+        }
+      ]
+    },
+    {
+      "id": "ai-lab",
+      "title": "AI Lab",
+      "scenes": [
+        {
+          "id": "not-mind-reader",
+          "number": 6,
+          "type": "interactive",
+          "title": "AI مش قارئ أفكار.",
+          "prompt": "أنا متوتر.",
+          "question": "AI بيعرف ليش؟",
+          "answer": "لا.",
+          "explanation": "إذا ما قلتله إن عندك امتحان بكرا، ما عنده طريقة يعرف هالشي من الجملة وحدها.",
+          "keyMessage": "AI يحتاج Context."
+        },
+        {
+          "id": "context",
+          "number": 7,
+          "type": "comparison",
+          "title": "Context بيغيّر كل شي.",
+          "weak": "ساعدني أدرس.",
+          "strong": "أنا طالب صف 11، عندي امتحان Biology بكرا. ساعدني أراجع أهم الأفكار.",
+          "question": "أي Prompt بيعطي AI معلومات أكثر؟",
+          "keyMessage": "كل ما أعطيت AI Context أوضح، صار عنده صورة أوضح عن المطلوب."
+        },
+        {
+          "id": "not-magic",
+          "number": 8,
+          "type": "title",
+          "title": "AI مش سحر.",
+          "items": [
+            "أنت بتعطيه Prompt.",
+            "AI بيعالج المعلومات والأنماط اللي تعلّم منها.",
+            "وبعدين بيولّد Response."
+          ],
+          "warning": "بس هيدا ما يعني إنه بيعرف كل شي."
+        },
+        {
+          "id": "how-ai-works",
+          "number": 9,
+          "type": "pipeline",
+          "title": "كيف بيشتغل AI؟",
+          "steps": [
+            {
+              "id": "prompt",
+              "label": "Prompt",
+              "caption": "شو طلبت من AI؟"
+            },
+            {
+              "id": "tokens",
+              "label": "Tokens",
+              "caption": "النص بيتقسّم لأجزاء يفهمها النموذج."
+            },
+            {
+              "id": "patterns",
+              "label": "Patterns",
+              "caption": "النموذج يتعامل مع أنماط تعلّمها."
+            },
+            {
+              "id": "probability",
+              "label": "Probability",
+              "caption": "بيتوقع شو الاحتمال الأنسب."
+            },
+            {
+              "id": "response",
+              "label": "Response",
+              "caption": "بيولّد الجواب."
+            }
+          ],
+          "keyMessage": "AI بيتوقع، مش بيفكّر مثل الإنسان."
+        },
+        {
+          "id": "why-ai-makes-mistakes",
+          "number": 10,
+          "type": "title",
+          "title": "طيب… ليش AI بيغلط؟",
+          "reasons": [
+            "المعلومات ممكن تكون ناقصة.",
+            "ممكن يفهم السؤال بطريقة غلط.",
+            "ممكن يولّد جواب شكله مقنع لكنه غير صحيح."
+          ],
+          "keyMessage": "AI ممكن يحكي بثقة… وهو غلط."
+        }
+      ]
+    },
+    {
+      "id": "study-lab",
+      "title": "Study Lab",
+      "scenes": [
+        {
+          "id": "tools-overview",
+          "number": 11,
+          "type": "title",
+          "title": "AI Toolbox",
+          "subtitle": "كل Tool إلها شغلة.",
+          "body": "مش المهم تعرف 20 AI. المهم تعرف أي Tool تستخدم ولأي مهمة."
+        },
+        {
+          "id": "study-tools",
+          "number": 12,
+          "type": "tools",
+          "title": "AI للدراسة.",
+          "tools": [
+            "ChatGPT",
+            "Claude",
+            "Gemini"
+          ],
+          "useCases": [
+            "شرح درس",
+            "أسئلة تدريبية",
+            "مراجعة",
+            "خطة دراسة",
+            "تبسيط فكرة"
+          ],
+          "keyMessage": "اسأل: شو أفضل AI لهالمهمة؟"
+        },
+        {
+          "id": "creative-tools",
+          "number": 13,
+          "type": "tools",
+          "title": "AI للإبداع.",
+          "categories": [
+            "Images",
+            "Video",
+            "Design",
+            "Presentations"
+          ],
+          "examples": [
+            "Canva AI",
+            "Gamma"
+          ],
+          "keyMessage": "من فكرة صغيرة… لشي فيك تشوفه."
+        },
+        {
+          "id": "coding-tools",
+          "number": 14,
+          "type": "tools",
+          "title": "AI للبرمجة.",
+          "tools": [
+            "ChatGPT",
+            "Claude",
+            "GitHub Copilot"
+          ],
+          "useCases": [
+            "فهم Code",
+            "Debugging",
+            "تعلّم Programming",
+            "اكتشاف الأخطاء"
+          ],
+          "keyMessage": "لا تخلي AI يكتب كل شي عنك. خليه يساعدك تفهم."
+        },
+        {
+          "id": "which-ai-for-which-task",
+          "number": 15,
+          "type": "interactive",
+          "title": "أي AI لأي مهمة؟",
+          "tasks": [
+            "بدي أدرس Chapter.",
+            "بدي أعمل Research.",
+            "بدي أصمم Presentation.",
+            "بدي أفهم Code.",
+            "بدي أبني فكرة مشروع."
+          ],
+          "keyMessage": "Tool ≠ Magic Tool"
+        },
+        {
+          "id": "weak-prompt",
+          "number": 16,
+          "type": "comparison",
+          "title": "Prompt ضعيف.",
+          "prompt": "اشرحلي Biology.",
+          "question": "شو المشكلة؟",
+          "problems": [
+            "ما في Context.",
+            "ما في Goal واضح.",
+            "ما في مستوى محدد."
+          ]
+        },
+        {
+          "id": "strong-prompt",
+          "number": 17,
+          "type": "comparison",
+          "title": "Prompt أقوى.",
+          "prompt": "أنا طالب صف 11. اشرحلي Photosynthesis بالعربي البسيط. أعطيني مثال من الحياة اليومية. وبعدين اختبرني بـ5 أسئلة.",
+          "components": [
+            "Context",
+            "Goal",
+            "Constraints",
+            "Output"
+          ],
+          "keyMessage": "نفس AI. بس السؤال صار أوضح."
+        },
+        {
+          "id": "prompt-framework",
+          "number": 18,
+          "type": "framework",
+          "title": "كيف تحكي مع AI؟",
+          "steps": [
+            {
+              "id": "context",
+              "label": "Context",
+              "question": "مين أنا؟"
+            },
+            {
+              "id": "goal",
+              "label": "Goal",
+              "question": "شو بدي؟"
+            },
+            {
+              "id": "constraints",
+              "label": "Constraints",
+              "question": "شو الشروط؟"
+            },
+            {
+              "id": "output",
+              "label": "Output",
+              "question": "كيف بدي الجواب؟"
+            }
+          ],
+          "keyMessage": "AI ما بيقرأ أفكارك. علّمه شو بدك بوضوح."
+        },
+        {
+          "id": "study-companion",
+          "number": 19,
+          "type": "interactive",
+          "title": "AI كـ Study Companion.",
+          "subtitle": "AI ممكن يساعدك تدرس. مش يدرس عنك.",
+          "roles": [
+            "Tutor",
+            "Quiz Partner",
+            "Study Planner",
+            "Language Partner",
+            "Brainstorming Partner"
+          ],
+          "keyMessage": "أنت بتضل الطالب. AI هو المساعد."
+        },
+        {
+          "id": "ask-to-teach",
+          "number": 20,
+          "type": "comparison",
+          "title": "خليه يعلّمك.",
+          "avoid": [
+            "اعطيني الجواب.",
+            "حلّها عني."
+          ],
+          "try": [
+            "ساعدني أوصل للجواب.",
+            "اسألني أسئلة بدل ما تعطيني الحل.",
+            "اشرحلي وين غلطت.",
+            "اختبرني.",
+            "اعطيني Hint."
+          ]
+        },
+        {
+          "id": "ai-and-learning",
+          "number": 21,
+          "type": "comparison",
+          "title": "AI والتعلّم.",
+          "aiHelps": [
+            "تفهم",
+            "تتدرّب",
+            "تبحث",
+            "تحسّن",
+            "تخلق"
+          ],
+          "aiReplaces": [
+            "يكتب",
+            "يحل",
+            "يقرر",
+            "يفكر"
+          ],
+          "keyMessage": "الهدف مش تخلي AI يعمل أكتر. الهدف تخلي حالك تتعلم أكتر."
+        }
+      ]
+    },
+    {
+      "id": "privacy",
+      "title": "Privacy & Cybersecurity",
+      "scenes": [
+        {
+          "id": "is-chatgpt-a-friend",
+          "number": 22,
+          "type": "title",
+          "title": "ChatGPT… صاحبك؟",
+          "body": "فيك تحكي مع AI الساعة 2 بالليل… وما يملّ، وما يقاطعك، ودايماً عنده وقت.",
+          "question": "بس… هل هيدا يعني إنه صاحبك؟"
+        },
+        {
+          "id": "why-ai-feels-like-a-friend",
+          "number": 23,
+          "type": "title",
+          "title": "ليش AI بيحسّسنا إنه قريب؟",
+          "reasons": [
+            "بيرد بسرعة.",
+            "بيتذكر Context المحادثة.",
+            "بيحكي بطريقة طبيعية.",
+            "بيحاول يساعدك.",
+            "وما عنده مشكلة تعيد السؤال عشر مرات."
+          ],
+          "keyMessage": "طبيعي تحس إنك عم تحكي مع حدا. بس الإحساس مش دليل إنه إنسان."
+        },
+        {
+          "id": "friend-lifecoach-secretkeeper",
+          "number": 24,
+          "type": "comparison",
+          "title": "Friend? Life Coach? Secret Keeper?",
+          "roles": [
+            "صاحب؟",
+            "Life Coach؟",
+            "Secret Keeper؟"
+          ],
+          "aiCanBe": [
+            "Study Companion",
+            "Brainstorming Partner",
+            "Practice Partner",
+            "Productivity Assistant"
+          ],
+          "boundaries": [
+            "مش بديل عن أهلك.",
+            "مش بديل عن أصحابك.",
+            "مش إنسان بيعرفك فعلاً.",
+            "ومش مكان تحط فيه كل أسرارك."
+          ]
+        },
+        {
+          "id": "what-to-share",
+          "number": 25,
+          "type": "privacy",
+          "title": "شو فيك تشارك؟",
+          "generallyOkay": [
+            "سؤال دراسي",
+            "فكرة مشروع",
+            "تمرين",
+            "نص بدك تحسّنه",
+            "موضوع عام"
+          ],
+          "rule": "قبل ما تبعت أي شي… اسأل حالك: هل هيدا الشي لازم يعرفه AI؟"
+        },
+        {
+          "id": "what-not-to-share",
+          "number": 26,
+          "type": "privacy",
+          "title": "شو ما لازم تشارك؟",
+          "neverShare": [
+            "Password",
+            "OTP",
+            "Bank information",
+            "ID / Passport",
+            "Private photos",
+            "Private documents",
+            "أسرار شخص تاني"
+          ]
+        },
+        {
+          "id": "ai-cybersecurity",
+          "number": 27,
+          "type": "cybersecurity",
+          "title": "AI + Cybersecurity",
+          "threats": [
+            "Phishing",
+            "Fake accounts",
+            "AI-generated scams",
+            "Deepfakes",
+            "Impersonation"
+          ],
+          "keyMessage": "AI صار يساعد المحتالين كمان.",
+          "rule": "مش كل شي بيبين حقيقي… حقيقي."
+        },
+        {
+          "id": "before-send",
+          "number": 28,
+          "type": "framework",
+          "title": "قبل ما تضغط Send.",
+          "questions": [
+            "شو عم ببعت؟",
+            "ليش عم ببعتو؟",
+            "هل لازم AI يعرف هالشي؟"
+          ],
+          "keyMessage": "AI مش Private Diary."
+        }
+      ]
+    },
+    {
+      "id": "future-city",
+      "title": "Future City",
+      "scenes": [
+        {
+          "id": "tool-vs-replacement",
+          "number": 29,
+          "type": "comparison",
+          "title": "AI يساعدك أم يستبدلك؟",
+          "healthyUse": [
+            "ساعدني أفهم.",
+            "اختبرني.",
+            "وين غلطت؟",
+            "ساعدني أحسن فكرتي."
+          ],
+          "dependency": [
+            "اعمل كل شي عني.",
+            "اعطيني الجواب.",
+            "اكتب كل شي.",
+            "فكّر عني."
+          ]
+        },
+        {
+          "id": "dependency",
+          "number": 30,
+          "type": "interactive",
+          "title": "إذا اختفى AI لمدة أسبوع، هل بتقدر تكمل؟",
+          "options": [
+            {
+              "id": "option-1",
+              "label": "أكيد.",
+              "facilitationAr": "ممتاز. AI أداة، مش شيء لازم تعتمد عليه بكل خطوة."
+            },
+            {
+              "id": "option-2",
+              "label": "بصير أصعب… بس بكمل.",
+              "facilitationAr": "هيدا طبيعي. المهم تضل عندك المهارات الأساسية."
+            },
+            {
+              "id": "option-3",
+              "label": "رح أحتاج وقت.",
+              "facilitationAr": "يمكن تكون معتمد عليه ببعض المهام. هيدا وقت مناسب تراجع هالاعتماد."
+            },
+            {
+              "id": "option-4",
+              "label": "ما بعرف شو بعمل.",
+              "facilitationAr": "مش مشكلة ولا عيب. الفكرة إننا نستخدم AI بطريقة تقوّي مهاراتنا، مش تستبدلها."
+            }
+          ],
+          "keyMessage": "المشكلة مش إنك تستخدم AI. المشكلة لما ما تعود تعرف تعمل شي بدونه."
+        },
+        {
+          "id": "non-ai-user",
+          "number": 31,
+          "type": "comparison",
+          "title": "شو عن الشخص اللي ما بيستخدم AI؟",
+          "profiles": [
+            {
+              "title": "ما بيستخدم AI أبداً",
+              "body": "ممكن يفوّت أدوات وفرص مفيدة."
+            },
+            {
+              "title": "بيستخدم AI لكل شي",
+              "body": "ممكن يصير معتمد عليه."
+            },
+            {
+              "title": "بيعرف إمتى وكيف يستخدم AI",
+              "body": "هون القوة."
+            }
+          ],
+          "keyMessage": "مش المطلوب تستخدم AI بكل شي. المطلوب تعرف إمتى تستخدمه، كيف تستخدمه، وإمتى ما تستخدمه."
+        },
+        {
+          "id": "future-jobs",
+          "number": 32,
+          "type": "interactive",
+          "title": "AI ومستقبلك.",
+          "question": "هل AI رح ياخد وظائفنا؟",
+          "careers": [
+            {
+              "id": "doctor",
+              "label": "طبيب",
+              "facilitationAr": "AI يساعد في تحليل المعلومات والمهام المتكررة، لكن القرار والمسؤولية والتعامل الإنساني يظلون مهمين."
+            },
+            {
+              "id": "developer",
+              "label": "مطوّر",
+              "facilitationAr": "AI يكتب ويشرح Code، لكن المطوّر يحتاج يفهم المشكلة ويختبر الحل ويتخذ القرارات التقنية."
+            },
+            {
+              "id": "designer",
+              "label": "مصمّم",
+              "facilitationAr": "AI يسرّع توليد الأفكار والنسخ الأولى، لكن الذوق والاختيار وفهم الجمهور ما زالوا مهمين."
+            },
+            {
+              "id": "teacher",
+              "label": "أستاذ",
+              "facilitationAr": "AI يساعد في تحضير المحتوى والتدريب، لكن فهم الطلاب والتفاعل معهم يحتاج إنسان."
+            },
+            {
+              "id": "engineer",
+              "label": "مهندس",
+              "facilitationAr": "AI يساعد في الحسابات والتحليل والتصميم، لكن المسؤولية والحكم الهندسي مهمان."
+            },
+            {
+              "id": "entrepreneur",
+              "label": "رائد أعمال",
+              "facilitationAr": "AI يساعد في البحث والأفكار والنماذج الأولية، لكن فهم المشكلة والناس واتخاذ القرار يبقى أساسياً."
+            }
+          ],
+          "keyMessage": "المنافس مش دائماً AI. أحياناً المنافس هو شخص بيعرف يشتغل مع AI."
+        },
+        {
+          "id": "final",
+          "number": 33,
+          "type": "final",
+          "title": "خلي AI يساعدك، مش يفكّر بدالك.",
+          "statements": [
+            "AI مش سحر.",
+            "AI مش قارئ أفكار.",
+            "AI مش بديل عنك.",
+            "AI أداة."
+          ],
+          "finalMessage": "خلي AI يساعدك، مش يفكّر بدالك.",
+          "speakerNotes": [
+            "اقرأ كل جملة ببطء مع توقف قصير بينها.",
+            "خلي الرسالة الأخيرة تبقى على الشاشة قبل إنهاء العرض."
+          ]
+        }
+      ]
+    }
+  ],
+  "coreRules": [
+    {
+      "title": "Verify Important Information",
+      "body": "خصوصاً المعلومات المتعلقة بالدراسة، العلم، الصحة، المال، والقرارات المهمة."
+    },
+    {
+      "title": "Protect Your Privacy",
+      "body": "Don't treat AI like a private diary."
+    },
+    {
+      "title": "Keep Your Critical Thinking",
+      "body": "اسأل دائماً: هل هيدا منطقي؟"
+    },
+    {
+      "title": "Don't Let AI Replace Real People",
+      "body": "AI ممكن يكون Companion، بس العلاقات الإنسانية بتضل مهمة."
+    },
+    {
+      "title": "Learn to Work With AI",
+      "body": "الهدف مش تستخدم AI لكل شي. الهدف تعرف إمتى تستخدمه، كيف تستخدمه، وإمتى ما تستخدمه."
+    }
+  ]
+}

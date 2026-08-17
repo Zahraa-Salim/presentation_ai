@@ -15,7 +15,7 @@ export const INTERACTIONS: readonly InteractionDef[] = [
   {
     id: 'opening-poll',
     kind: 'poll',
-    sceneId: 'do-you-use-ai',
+    sceneId: 'opening-poll',
     promptAr: 'هل استخدمت AI من قبل؟',
     options: [
       { id: 'yes', label: 'نعم' },
@@ -23,30 +23,32 @@ export const INTERACTIONS: readonly InteractionDef[] = [
       { id: 'never', label: 'أبداً' },
     ],
     estimatedSec: 60,
-    facilitationAr: [TODO('كيف يدير الأستاذ التصويت أمام الصف')],
+    facilitationAr: ['طيب… مين عم يستخدم مين؟'],
   },
   {
+    /*
+      The deck answers this outright — `لا.` plus why — rather than fanning out
+      possibilities for the class to choose between. An earlier design offered
+      four candidate reasons; the deck does not, so it was removed. Making any
+      of them selectable would also have implied one was the answer.
+    */
     id: 'mind-reader',
     kind: 'reveal',
-    sceneId: 'not-a-mind-reader',
+    sceneId: 'not-mind-reader',
     promptAr: 'AI بيعرف ليش؟',
     options: [
       { id: 'statement', label: 'أنا متوتر.' },
-      // The possibilities AI cannot choose between. The brief does not supply
-      // them, so they stay TODO rather than being invented — four short Arabic
-      // phrases fill these; the interaction works either way.
-      { id: 'possibility-1', label: TODO('احتمال ١') },
-      { id: 'possibility-2', label: TODO('احتمال ٢') },
-      { id: 'possibility-3', label: TODO('احتمال ٣') },
-      { id: 'possibility-4', label: TODO('احتمال ٤') },
+      { id: 'answer', label: 'لا.' },
     ],
     estimatedSec: 70,
-    facilitationAr: [TODO('نص الكشف عن الـ Context')],
+    facilitationAr: [
+      'إذا ما قلتله إن عندك امتحان بكرا، ما عنده طريقة يعرف هالشي من الجملة وحدها.',
+    ],
   },
   {
     id: 'prompt-lab',
     kind: 'lab',
-    sceneId: 'prompt-formula',
+    sceneId: 'prompt-framework',
     promptAr: 'اشرحلي Biology.',
     options: [
       { id: 'context', label: 'Context' },
@@ -55,54 +57,64 @@ export const INTERACTIONS: readonly InteractionDef[] = [
       { id: 'output', label: 'Output' },
     ],
     estimatedSec: 110,
-    facilitationAr: [TODO('نص الـ Prompt المحسّن بعد كل خطوة')],
+    // One question per build stage, in the same order as the options above.
+    facilitationAr: ['مين أنا؟', 'شو بدي؟', 'شو الشروط؟', 'كيف بدي الجواب؟'],
   },
   {
     id: 'tool-explorer',
     kind: 'explorer',
     sceneId: 'which-ai-for-which-task',
-    promptAr: TODO('سؤال الـ Tool Explorer'),
+    promptAr: 'أي AI لأي مهمة؟',
     options: [
-      { id: 'study', label: 'أدرس' },
-      { id: 'research', label: 'أبحث' },
-      { id: 'design', label: 'أصمم' },
-      { id: 'code', label: 'أبرمج' },
-      { id: 'write', label: 'أكتب' },
-      { id: 'build', label: 'أبني مشروع' },
+      { id: 'study', label: 'بدي أدرس Chapter.' },
+      { id: 'research', label: 'بدي أعمل Research.' },
+      { id: 'design', label: 'بدي أصمم Presentation.' },
+      { id: 'code', label: 'بدي أفهم Code.' },
+      { id: 'build', label: 'بدي أبني فكرة مشروع.' },
     ],
     estimatedSec: 90,
-    facilitationAr: [TODO('الأدوات المقترحة لكل خيار')],
+    facilitationAr: [TODO('الأدوات المقترحة لكل مهمة من المهام الخمس')],
   },
   {
     id: 'study-companion',
     kind: 'branch',
     sceneId: 'study-companion',
-    promptAr: TODO('سؤال رفيق الدراسة'),
+    promptAr: 'AI ممكن يساعدك تدرس. مش يدرس عنك.',
     options: [
-      { id: 'explain', label: 'اشرح' },
-      { id: 'quiz', label: 'اختبرني' },
-      { id: 'plan', label: 'اعمل خطة' },
-      { id: 'example', label: 'اعطيني مثال' },
-      { id: 'correct', label: 'صححلي' },
+      { id: 'tutor', label: 'Tutor' },
+      { id: 'quiz-partner', label: 'Quiz Partner' },
+      { id: 'study-planner', label: 'Study Planner' },
+      { id: 'language-partner', label: 'Language Partner' },
+      { id: 'brainstorming-partner', label: 'Brainstorming Partner' },
     ],
     estimatedSec: 90,
-    facilitationAr: [TODO('ماذا يعرض بعد كل خيار')],
+    facilitationAr: [TODO('شو بتكتب للـ AI ليلعب كل دور من الأدوار الخمسة')],
   },
   {
     id: 'privacy-sorter',
     kind: 'sorter',
-    sceneId: 'never-share',
-    promptAr: TODO('تعليمات الفرز'),
+    sceneId: 'what-not-to-share',
+    promptAr: 'شو ما لازم تشارك؟',
+    // `correct: true` means "safe to share". The label always states which is
+    // which, so the sorter never depends on colour alone.
     options: [
-      { id: 'homework', label: 'واجب مدرسي', correct: true },
-      { id: 'general-question', label: 'سؤال عام', correct: true },
+      { id: 'homework', label: 'سؤال دراسي', correct: true },
+      { id: 'project-idea', label: 'فكرة مشروع', correct: true },
+      { id: 'exercise', label: 'تمرين', correct: true },
+      { id: 'text-to-improve', label: 'نص بدك تحسّنه', correct: true },
+      { id: 'general-topic', label: 'موضوع عام', correct: true },
       { id: 'password', label: 'Password', correct: false },
       { id: 'otp', label: 'OTP', correct: false },
-      { id: 'id', label: 'ID', correct: false },
-      { id: 'private-photo', label: 'صورة خاصة', correct: false },
+      { id: 'bank', label: 'Bank information', correct: false },
+      { id: 'id', label: 'ID / Passport', correct: false },
+      { id: 'private-photos', label: 'Private photos', correct: false },
+      { id: 'private-documents', label: 'Private documents', correct: false },
+      { id: 'others-secrets', label: 'أسرار شخص تاني', correct: false },
     ],
     estimatedSec: 120,
-    facilitationAr: [TODO('شرح كل عنصر بعد الفرز')],
+    facilitationAr: ['قبل ما تبعت أي شي… اسأل حالك: هل هيدا الشي لازم يعرفه AI؟'],
+    // "Right answer" wording would be wrong here — these are not answers.
+    verdictAr: { correct: 'آمن للمشاركة', incorrect: 'لا تشارك' },
   },
   {
     id: 'real-or-fake',
@@ -114,25 +126,36 @@ export const INTERACTIONS: readonly InteractionDef[] = [
       label,
     })),
     estimatedSec: 120,
+    // The deck names the threats but supplies no pair to compare, so the two
+    // items above stay open. Threats: Phishing · Fake accounts ·
+    // AI-generated scams · Deepfakes · Impersonation.
     facilitationAr: [TODO('علامات التزوير التي يجب لفت النظر إليها')],
   },
   {
     id: 'dependency',
     kind: 'branch',
-    sceneId: 'if-ai-disappeared',
+    sceneId: 'dependency',
     promptAr: 'إذا اختفى AI لمدة أسبوع، هل بتقدر تكمل؟',
-    options: [TODO('الخيارات')].map((label, i) => ({
-      id: `option-${i + 1}`,
-      label,
-    })),
+    options: [
+      { id: 'option-1', label: 'أكيد.' },
+      { id: 'option-2', label: 'بصير أصعب… بس بكمل.' },
+      { id: 'option-3', label: 'رح أحتاج وقت.' },
+      { id: 'option-4', label: 'ما بعرف شو بعمل.' },
+    ],
     estimatedSec: 100,
-    facilitationAr: [TODO('النتائج المعروضة لكل خيار')],
+    // One line per option, in the same order. Reflective, never shaming.
+    facilitationAr: [
+      'ممتاز. AI أداة، مش شيء لازم تعتمد عليه بكل خطوة.',
+      'هيدا طبيعي. المهم تضل عندك المهارات الأساسية.',
+      'يمكن تكون معتمد عليه ببعض المهام. هيدا وقت مناسب تراجع هالاعتماد.',
+      'مش مشكلة ولا عيب. الفكرة إننا نستخدم AI بطريقة تقوّي مهاراتنا، مش تستبدلها.',
+    ],
   },
   {
     id: 'career',
     kind: 'explorer',
-    sceneId: 'jobs-and-skills',
-    promptAr: TODO('سؤال المهن'),
+    sceneId: 'future-jobs',
+    promptAr: 'هل AI رح ياخد وظائفنا؟',
     options: [
       { id: 'doctor', label: 'طبيب' },
       { id: 'developer', label: 'مطوّر' },
@@ -142,7 +165,15 @@ export const INTERACTIONS: readonly InteractionDef[] = [
       { id: 'entrepreneur', label: 'رائد أعمال' },
     ],
     estimatedSec: 100,
-    facilitationAr: [TODO('كيف يتغيّر كل دور مع الـ AI')],
+    // One line per role, in the same order as the options above.
+    facilitationAr: [
+      'AI يساعد في تحليل المعلومات والمهام المتكررة، لكن القرار والمسؤولية والتعامل الإنساني يظلون مهمين.',
+      'AI يكتب ويشرح Code، لكن المطوّر يحتاج يفهم المشكلة ويختبر الحل ويتخذ القرارات التقنية.',
+      'AI يسرّع توليد الأفكار والنسخ الأولى، لكن الذوق والاختيار وفهم الجمهور ما زالوا مهمين.',
+      'AI يساعد في تحضير المحتوى والتدريب، لكن فهم الطلاب والتفاعل معهم يحتاج إنسان.',
+      'AI يساعد في الحسابات والتحليل والتصميم، لكن المسؤولية والحكم الهندسي مهمان.',
+      'AI يساعد في البحث والأفكار والنماذج الأولية، لكن فهم المشكلة والناس واتخاذ القرار يبقى أساسياً.',
+    ],
   },
 ] as const
 

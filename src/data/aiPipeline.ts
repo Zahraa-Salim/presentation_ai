@@ -1,11 +1,8 @@
-import { TODO } from '@/lib/todo'
-
 /**
- * The five stages of `كيف يعمل؟` (scene 9).
+ * The five stages of `كيف بيشتغل AI؟` (scene 9).
  *
- * Stage names come from the brief — Prompt → tokens → patterns → probability →
- * response — and stay in English as technical terms. How each is explained to
- * students is educational content, so the Arabic captions are TODO.
+ * Stage names and captions come from the deck — Prompt → Tokens → Patterns →
+ * Probability → Response. The names stay in English as technical terms.
  *
  * The ids here must match scene 9's reveal step ids exactly; a test asserts it,
  * because a mismatch would desynchronise the DOM label from the 3D stage that
@@ -25,31 +22,31 @@ export const AI_PIPELINE: readonly PipelineStage[] = [
   {
     id: 'prompt',
     label: 'Prompt',
-    captionAr: TODO('شرح: شو بيوصل للـ AI'),
+    captionAr: 'شو طلبت من AI؟',
     position: 0,
   },
   {
     id: 'tokens',
-    label: 'tokens',
-    captionAr: TODO('شرح: تقطيع النص لوحدات'),
+    label: 'Tokens',
+    captionAr: 'النص بيتقسّم لأجزاء يفهمها النموذج.',
     position: 0.25,
   },
   {
     id: 'patterns',
-    label: 'patterns',
-    captionAr: TODO('شرح: أنماط تعلّمها من بيانات'),
+    label: 'Patterns',
+    captionAr: 'النموذج يتعامل مع أنماط تعلّمها.',
     position: 0.5,
   },
   {
     id: 'probability',
-    label: 'probability',
-    captionAr: TODO('شرح: احتمالات، مش معرفة'),
+    label: 'Probability',
+    captionAr: 'بيتوقع شو الاحتمال الأنسب.',
     position: 0.75,
   },
   {
     id: 'response',
-    label: 'response',
-    captionAr: TODO('شرح: الجواب الناتج'),
+    label: 'Response',
+    captionAr: 'بيولّد الجواب.',
     position: 1,
   },
 ] as const

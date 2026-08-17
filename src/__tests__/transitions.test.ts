@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { SCENES } from '@/data/scenes'
+import { getBeatLayout } from '@/lib/beats'
 import {
   DURATIONS,
   RTL_SIGN,
@@ -93,11 +94,16 @@ describe('statement phases', () => {
     expect(statements).toHaveLength(5)
   })
 
+  /* Reads the layout rather than re-deriving it. The hand-rolled
+     `steps.length + 1` was right only while no statementReveal scene had
+     comparison columns — it would have gone quietly wrong the moment one did,
+     asserting the phase at a beat the scene no longer uses. */
   it('reveals only at each scene’s own statement beat, after any steps', () => {
     for (const scene of statements) {
-      const statementBeat = (scene.content.steps?.length ?? 0) + 1
-      expect(getStatementPhase(scene, statementBeat - 1)).toBe('sentence')
-      expect(getStatementPhase(scene, statementBeat)).toBe('revealed')
+      const { statementBeat } = getBeatLayout(scene)
+      expect(statementBeat, scene.id).not.toBeNull()
+      expect(getStatementPhase(scene, statementBeat! - 1)).toBe('sentence')
+      expect(getStatementPhase(scene, statementBeat!)).toBe('revealed')
     }
   })
 

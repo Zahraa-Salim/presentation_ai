@@ -25,11 +25,19 @@ describe('beat layout', () => {
       for (let i = 0; i < layout.stepCount; i++) {
         claim(layout.stepsStart + i, 'step')
       }
+      if (layout.groupsStart !== null) {
+        for (let i = 0; i < layout.groupCount; i++) {
+          claim(layout.groupsStart + i, 'group')
+        }
+      }
       if (layout.statementBeat !== null) claim(layout.statementBeat, 'statement')
       if (layout.interactionStart !== null) {
         for (let i = 0; i < layout.interactionBeats; i++) {
           claim(layout.interactionStart + i, 'interaction')
         }
+      }
+      if (layout.keyMessageBeat !== null) {
+        claim(layout.keyMessageBeat, 'keyMessage')
       }
 
       for (let beat = 1; beat < layout.total; beat++) {
@@ -61,6 +69,44 @@ describe('beat layout', () => {
     const layout = getBeatLayout(finale)
     expect(layout.stepCount).toBe(4)
     expect(layout.statementBeat).toBe(5)
+  })
+
+  it('has a keyMessage beat exactly when the scene has a keyMessage', () => {
+    for (const scene of SCENES) {
+      const hasBeat = getBeatLayout(scene).keyMessageBeat !== null
+      expect(hasBeat, scene.id).toBe(scene.content.keyMessage !== undefined)
+    }
+  })
+
+  /* The takeaway is a conclusion, so nothing may follow it — including the
+     interaction on the five interactive scenes that carry one. */
+  it('always lands the keyMessage on the final beat', () => {
+    for (const scene of SCENES) {
+      const layout = getBeatLayout(scene)
+      if (layout.keyMessageBeat === null) continue
+      expect(layout.keyMessageBeat, scene.id).toBe(layout.total - 1)
+    }
+  })
+
+  it('has a group range exactly when the scene has comparison columns', () => {
+    for (const scene of SCENES) {
+      const hasRange = getBeatLayout(scene).groupsStart !== null
+      expect(hasRange).toBe((scene.content.groups?.length ?? 0) > 0)
+    }
+  })
+
+  /* Steps → groups → statement → interaction. A comparison must be able to
+     resolve into a statement, so groups sit before it, not after. */
+  it('orders groups after the steps and before the statement', () => {
+    for (const scene of SCENES) {
+      const layout = getBeatLayout(scene)
+      if (layout.groupsStart === null) continue
+
+      expect(layout.groupsStart).toBe(layout.stepsStart + layout.stepCount)
+      if (layout.statementBeat !== null) {
+        expect(layout.statementBeat).toBe(layout.groupsStart + layout.groupCount)
+      }
+    }
   })
 })
 

@@ -44,9 +44,33 @@ export type RevealEmphasis = 'normal' | 'strong' | 'quiet'
 
 export interface RevealStep {
   id: string
+  /**
+   * Short heading above the text — the deck's pipeline and framework stages
+   * name each step (Prompt, Tokens, Context, Goal ...) before explaining it.
+   * Usually a Latin technical term, so it renders with `.latin`.
+   */
+  label?: string
   /** Arabic. */
   text: string
   emphasis?: RevealEmphasis
+}
+
+/** Colour is never the only signal — `label` always states the meaning. */
+export type GroupTone = 'positive' | 'negative' | 'neutral'
+
+/**
+ * One labelled column in a side-by-side comparison.
+ *
+ * The deck compares constantly — weak vs strong prompt, avoid vs try, what AI
+ * helps with vs what it replaces, safe vs never-share. Ten scenes are built
+ * this way, so it is a first-class shape rather than ad-hoc markup per scene.
+ */
+export interface ContentGroup {
+  id: string
+  /** Arabic heading. Carries the meaning that `tone` only reinforces. */
+  label: string
+  items: string[]
+  tone?: GroupTone
 }
 
 /**
@@ -56,10 +80,19 @@ export interface RevealStep {
 export interface SceneContent {
   headline?: string
   subheadline?: string
+  /**
+   * A quoted example the scene is *about* — a prompt, a message, a request.
+   * Rendered as a quotation, not as body copy.
+   */
+  example?: string
   /** Progressive reveals, advanced by the presenter. */
   steps?: RevealStep[]
+  /** Two or three labelled columns, revealed one per beat. */
+  groups?: ContentGroup[]
   /** The single sentence used by 'statementReveal' transitions. */
   statement?: string
+  /** The line the scene lands on, rendered last and with weight. */
+  keyMessage?: string
   note?: string
 }
 

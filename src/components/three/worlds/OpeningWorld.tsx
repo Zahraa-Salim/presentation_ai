@@ -1,14 +1,13 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import {
   AdditiveBlending,
-  BufferAttribute,
-  BufferGeometry,
   type Mesh,
   type MeshStandardMaterial,
   type Points as PointsType,
 } from 'three'
 import { usePresentation } from '@/hooks/usePresentation'
+import { useBlendedPositions } from '@/hooks/useBlendedPositions'
 import { makeRandom, seedFromString } from '@/lib/random'
 import type { Scene3DProps } from '@/components/three/sceneRegistry'
 
@@ -20,21 +19,21 @@ import type { Scene3DProps } from '@/components/three/sceneRegistry'
  *
  * One eased `formation` value drives all of it, so the whole sequence is a
  * single interpolation rather than a timeline to keep in sync. Positions are
- * precomputed for both states and blended per frame.
+ * precomputed for both states and blended while the value is still moving.
  */
+
 export function OpeningWorld({ quality, accent }: Scene3DProps) {
   const { beat } = usePresentation()
 
   const pointsRef = useRef<PointsType>(null)
   const coreRef = useRef<Mesh>(null)
   const ringRef = useRef<Mesh>(null)
-  const formation = useRef(0)
 
   const count = Math.floor(quality.particleBudget * 0.9)
 
   // Two position sets: scattered and gathered. Blending between them is
   // cheaper and steadier than simulating attraction every frame.
-  const { geometry, scattered, gathered } = useMemo(() => {
+  const { scattered, gathered } = useMemo(() => {
     const random = makeRandom(seedFromString('opening'))
     const scatteredPositions = new Float32Array(count * 3)
     const gatheredPositions = new Float32Array(count * 3)
@@ -57,34 +56,24 @@ export function OpeningWorld({ quality, accent }: Scene3DProps) {
       gatheredPositions[i * 3 + 2] = nearRadius * Math.cos(phi)
     }
 
-    const geo = new BufferGeometry()
-    geo.setAttribute(
-      'position',
-      new BufferAttribute(new Float32Array(scatteredPositions), 3),
-    )
-
     return {
-      geometry: geo,
       scattered: scatteredPositions,
       gathered: gatheredPositions,
     }
   }, [count])
 
-  useEffect(() => () => geometry.dispose(), [geometry])
+  const { geometry, formation } = useBlendedPositions({
+    from: scattered,
+    to: gathered,
+    target: beat >= 1 ? 1 : 0,
+    speed: 2.2,
+    reducedMotion: quality.reducedMotion,
+  })
 
   useFrame((_, delta) => {
-    const target = beat >= 1 ? 1 : 0
-    const rate = quality.reducedMotion ? 1 : 1 - Math.exp(-2.2 * delta)
-    formation.current += (target - formation.current) * rate
-
+    // The blend and its settle guard live in useBlendedPositions; this is the
+    // ignition that rides along with it.
     const t = formation.current
-    const attribute = geometry.getAttribute('position') as BufferAttribute
-    const array = attribute.array as Float32Array
-
-    for (let i = 0; i < array.length; i++) {
-      array[i] = scattered[i] + (gathered[i] - scattered[i]) * t
-    }
-    attribute.needsUpdate = true
 
     if (pointsRef.current && !quality.reducedMotion) {
       pointsRef.current.rotation.y += delta * 0.03

@@ -8,8 +8,11 @@ export { Card } from './Card'
 export type { CardSurface } from './Card'
 
 export { ChoiceCard } from './ChoiceCard'
-export type { ChoiceState } from './ChoiceCard'
+export type { ChoiceState, VerdictLabels } from './ChoiceCard'
 
+export { CompareGroups } from './CompareGroups'
+
+export { NovaSpeech } from './NovaSpeech'
 export { QuestionCard } from './QuestionCard'
 export { RevealCard } from './RevealCard'
 export { RevealText } from './RevealText'

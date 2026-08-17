@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { AdditiveBlending, type Group, type Mesh, type MeshStandardMaterial } from 'three'
 import { ParticleField } from '@/components/three/ParticleField'
@@ -52,6 +52,8 @@ export function AICharacter({
   const current = useRef({ openness: 0.7, tilt: 0, separation: 1, pulse: 0.6 })
   const clock = useRef(0)
   const blink = useRef({ timer: 2, closing: 0 })
+  /** 1 → 0 over roughly half a second after a bursting emotion arrives. */
+  const burst = useRef(0)
 
   // Seeded so blinking is deterministic and never syncs with the beat.
   const random = useMemo(() => makeRandom(0x4e4f5641), [])
@@ -62,11 +64,27 @@ export function AICharacter({
 
   const hue = target.hue ?? accent
 
+  /*
+    `celebrate` is the only expression that bursts, and only on arrival — see
+    novaExpressions.ts. Kicked from an effect rather than compared per frame, so
+    re-entering the same emotion does not re-fire it and a held celebration does
+    not pulse forever. Reduced motion skips it entirely, which is also what
+    toStillExpression does to the flag.
+  */
+  useEffect(() => {
+    if (!quality.reducedMotion && getExpression(emotion).burst) {
+      burst.current = 1
+    }
+  }, [emotion, quality.reducedMotion])
+
   useFrame((_, delta) => {
     const group = groupRef.current
     if (!group) return
 
     clock.current += delta
+    if (burst.current > 0) {
+      burst.current = Math.max(0, burst.current - delta * 2.2)
+    }
 
     const c = current.current
     c.tilt = ease(c.tilt, target.lensTilt, delta)
@@ -101,20 +119,26 @@ export function AICharacter({
     }
 
     // ---- core pulse -----------------------------------------------------
+    // Eased so the burst reads as a flare rather than a step change.
+    const flare = burst.current * burst.current
+
     if (coreRef.current) {
       const material = coreRef.current.material as MeshStandardMaterial
       material.emissiveIntensity =
-        c.pulse * (0.9 + Math.sin(clock.current * 2.4) * 0.1)
+        c.pulse * (0.9 + Math.sin(clock.current * 2.4) * 0.1) + flare * 1.8
     }
 
     // ---- rings ----------------------------------------------------------
+    // The rings throw outward on a burst, which is what makes it read as one.
+    const spread = c.separation * (1 + flare * 0.45)
+
     if (ringARef.current) {
       ringARef.current.rotation.z += delta * target.ringSpeed
-      ringARef.current.scale.setScalar(c.separation)
+      ringARef.current.scale.setScalar(spread)
     }
     if (ringBRef.current) {
       ringBRef.current.rotation.z -= delta * target.ringSpeed * 0.75
-      ringBRef.current.scale.setScalar(c.separation * 1.18)
+      ringBRef.current.scale.setScalar(spread * 1.18)
     }
   })
 

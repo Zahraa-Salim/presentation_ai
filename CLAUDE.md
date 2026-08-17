@@ -81,7 +81,11 @@ React 19.2 · TypeScript 5.9 · Vite 8 · Tailwind CSS v4 (CSS-first) · Motion 
 Three.js · React Three Fiber 9 · @react-three/drei · Lucide React
 
 Optional, only when actually needed: GSAP (complex camera/timeline
-choreography only), Howler.js, @react-three/postprocessing, Rapier.
+choreography only), @react-three/postprocessing, Rapier.
+
+**No audio.** Decided 2026-08-17: the presentation is silent. No audio library,
+no sound assets, no `src/assets/audio`. A teacher talking over a 45-minute
+lesson does not need the room competing with them.
 
 ### Version constraints that will break the build if violated
 

@@ -5,8 +5,11 @@ export type CardSurface = 'panel' | 'glass' | 'outline'
 /**
  * `panel` is the house style: an opaque surface that stays legible over the
  * moving 3D world behind it, with no backdrop-blur to pay for on weak GPUs.
- * `glass` is the light frosted variant (this is where GlassCard lives — one
- * component with three surfaces beats two that drift apart).
+ *
+ * ⚠️ `glass` costs a backdrop-blur, which is exactly what the recorded decision
+ * rules out for anything sitting over the canvas — a full-screen blur is 4–8ms
+ * a frame on integrated graphics, every frame, for 45 minutes. It exists for
+ * the dev gallery and nothing else. A test in `worlds.test.ts` keeps it there.
  */
 const SURFACES: Record<CardSurface, string> = {
   panel: 'border-line bg-surface shadow-card',

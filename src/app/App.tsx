@@ -1,11 +1,13 @@
-import { Suspense, lazy, useEffect, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import { MotionConfig } from 'motion/react'
 import { NavigationSurface } from '@/components/presentation/NavigationSurface'
 import { PresentationChrome } from '@/components/presentation/PresentationChrome'
 import { PresentationProvider } from '@/components/presentation/PresentationProvider'
+import { PresenterClockTracker } from '@/components/presentation/PresenterClockTracker'
+import { PresenterOverlay } from '@/components/presentation/PresenterOverlay'
 import { SceneTransition } from '@/components/presentation/SceneTransition'
 import { ComponentGallery } from '@/components/ui/ComponentGallery'
-import { NovaSpeech } from '@/components/ui/NovaSpeech'
+import { NovaSpeech } from '@/components/ui'
 import { SceneRenderer } from '@/scenes/SceneRenderer'
 import { NOVA_EMOTIONS } from '@/types'
 import { SCENES } from '@/data/scenes'
@@ -13,6 +15,7 @@ import { usePresentation, usePresentationActions } from '@/hooks/usePresentation
 import { useFullscreen, type FullscreenApi } from '@/hooks/useFullscreen'
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation'
 import { KEY_BINDINGS, isTypingTarget } from '@/lib/keymap'
+import { startPresenterSessionIfIdle } from '@/lib/presenterSession'
 import { getStatementPhase } from '@/lib/transitions'
 import type { NavIntent, NovaEmotion } from '@/types'
 
@@ -22,6 +25,20 @@ const ExperienceCanvas = lazy(() =>
     default: m.ExperienceCanvas,
   })),
 )
+
+/*
+  Which intents start the presenter clock. Deliberately excludes `presenter`,
+  `fullscreen` and `escape`: opening the panel to check a note before the class
+  begins must not start timing the lesson.
+*/
+const NAVIGATION_INTENTS = new Set<NavIntent>([
+  'next',
+  'prev',
+  'nextScene',
+  'prevScene',
+  'first',
+  'last',
+])
 
 /** The part that actually transitions. Replaced by real scenes later. */
 function SceneCard() {
@@ -282,7 +299,9 @@ function HarnessButton({
  */
 function PresentationStage() {
   return (
-    <div className="absolute inset-0">
+    // Explicitly above the canvas. This used to rely on DOM order alone, which
+    // works until someone reorders AppInner's children.
+    <div className="absolute inset-0 z-[var(--z-scene)]">
       <SceneTransition>
         <SceneRenderer />
       </SceneTransition>
@@ -299,11 +318,30 @@ function AppInner({ fullscreen }: { fullscreen: FullscreenApi }) {
   const [lastIntent, setLastIntent] = useState<NavIntent | null>(null)
   const [novaEmotion, setNovaEmotion] = useState<NovaEmotion>('idle')
   const [showHarness, setShowHarness] = useState(false)
+  const [showPresenter, setShowPresenter] = useState(false)
+
+  /*
+    The presenter clock starts on the first *navigation*, not on load and not
+    on `P` — see src/lib/presenterSession.ts. This is the one choke point every
+    navigation passes through, keyboard and pointer alike.
+  */
+  const onIntent = useCallback((intent: NavIntent) => {
+    if (NAVIGATION_INTENTS.has(intent)) startPresenterSessionIfIdle()
+    setLastIntent(intent)
+  }, [])
 
   useKeyboardNavigation({
-    onIntent: setLastIntent,
-    onEscape: () => setLastIntent('escape'),
-    onPresenter: () => setLastIntent('presenter'),
+    onIntent,
+    onEscape: () => {
+      setLastIntent('escape')
+      // Escape dismisses the panel first. The intent's eventual job — resetting
+      // an interaction — sits behind this check when it is implemented.
+      setShowPresenter(false)
+    },
+    onPresenter: () => {
+      setLastIntent('presenter')
+      setShowPresenter((open) => !open)
+    },
     onFullscreen: () => {
       setLastIntent('fullscreen')
       fullscreen.toggle()
@@ -314,8 +352,13 @@ function AppInner({ fullscreen }: { fullscreen: FullscreenApi }) {
     `D` toggles the harness. Handled here rather than in src/lib/keymap.ts on
     purpose: the harness is temporary scaffolding and should not appear in the
     product key map or a future help overlay.
+
+    DEV only — the hint below was already gated, but the handler was not, so a
+    stray `D` during a lesson opened a debug page on the projector.
   */
   useEffect(() => {
+    if (!import.meta.env.DEV) return
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key.toLowerCase() !== 'd') return
       if (event.repeat || event.ctrlKey || event.altKey || event.metaKey) return
@@ -335,7 +378,9 @@ function AppInner({ fullscreen }: { fullscreen: FullscreenApi }) {
         />
       </Suspense>
 
-      <NavigationSurface onIntent={setLastIntent}>
+      <PresenterClockTracker />
+
+      <NavigationSurface onIntent={onIntent}>
         {showHarness ? (
           <DevHarness
             lastIntent={lastIntent}
@@ -348,6 +393,8 @@ function AppInner({ fullscreen }: { fullscreen: FullscreenApi }) {
 
         <PresentationChrome fullscreen={fullscreen} />
       </NavigationSurface>
+
+      {showPresenter && <PresenterOverlay />}
 
       {import.meta.env.DEV && (
         <p className="text-caption fixed bottom-3 start-4 z-[var(--z-presenter)] text-muted/50 latin">

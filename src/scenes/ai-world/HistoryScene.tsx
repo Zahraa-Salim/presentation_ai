@@ -1,6 +1,8 @@
 import { motion } from 'motion/react'
 import { SectionTitle } from '@/components/ui'
 import { AI_HISTORY } from '@/data/aiHistory'
+import { usePresentation } from '@/hooks/usePresentation'
+import { getBeatLayout } from '@/lib/beats'
 import { isTodo } from '@/lib/todo'
 import { REVEAL_PRESET } from '@/lib/transitions'
 import type { SceneDef } from '@/types'
@@ -18,40 +20,50 @@ import type { SceneDef } from '@/types'
  * direction and the geometry.
  */
 export function HistoryScene({ scene }: { scene: SceneDef }) {
+  const { beat } = usePresentation()
+  const layout = getBeatLayout(scene)
+
   return (
     <div className="flex h-full flex-col justify-center gap-14">
-      <SectionTitle eyebrow={scene.id}>
-        {scene.content.headline ?? scene.title}
-      </SectionTitle>
+      {/* No eyebrow: the chrome already names the world. */}
+      <SectionTitle>{scene.content.headline ?? scene.title}</SectionTitle>
 
       <ol className="flex flex-wrap items-start gap-x-4 gap-y-8">
-        {AI_HISTORY.map((milestone, index) => (
-          <motion.li
-            key={milestone.id}
-            initial={REVEAL_PRESET.initial}
-            animate={REVEAL_PRESET.animate}
-            transition={{
-              duration: REVEAL_PRESET.durationSec,
-              ease: REVEAL_PRESET.ease,
-              delay: index * 0.08,
-            }}
-            className="flex min-w-40 flex-1 flex-col gap-2"
-          >
-            <span className="text-title font-bold text-accent tabular-nums latin">
-              {milestone.year}
-            </span>
-            <span className="text-lead font-medium text-bright latin">
-              {milestone.label}
-            </span>
-            <span
-              className={`text-caption ${
-                isTodo(milestone.captionAr) ? 'text-warning' : 'text-soft'
-              }`}
+        {AI_HISTORY.map((milestone, index) => {
+          // One milestone per press, so the presenter can talk through 70
+          // years rather than dropping all five on the class at once.
+          const revealed = beat >= layout.stepsStart + index
+
+          return (
+            <motion.li
+              key={milestone.id}
+              initial={false}
+              animate={
+                revealed ? REVEAL_PRESET.animate : REVEAL_PRESET.initial
+              }
+              transition={{
+                duration: REVEAL_PRESET.durationSec,
+                ease: REVEAL_PRESET.ease,
+              }}
+              aria-hidden={!revealed}
+              className="flex min-w-40 flex-1 flex-col gap-2"
             >
-              {milestone.captionAr}
-            </span>
-          </motion.li>
-        ))}
+              <span className="text-title font-bold text-accent tabular-nums latin">
+                {milestone.year}
+              </span>
+              <span className="text-lead font-medium text-bright latin">
+                {milestone.label}
+              </span>
+              <span
+                className={`text-caption ${
+                  isTodo(milestone.captionAr) ? 'text-warning' : 'text-soft'
+                }`}
+              >
+                {milestone.captionAr}
+              </span>
+            </motion.li>
+          )
+        })}
       </ol>
 
       {scene.content.note && (

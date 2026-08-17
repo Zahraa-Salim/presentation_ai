@@ -1,14 +1,13 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import {
   AdditiveBlending,
-  BufferAttribute,
-  BufferGeometry,
   type Group,
   type Points as PointsType,
 } from 'three'
 import { AI_PIPELINE } from '@/data/aiPipeline'
 import { usePresentation } from '@/hooks/usePresentation'
+import { useBlendedPositions } from '@/hooks/useBlendedPositions'
 import { getBeatLayout } from '@/lib/beats'
 import { getMindFormation } from '@/lib/mindFormation'
 import { makeRandom, seedFromString } from '@/lib/random'
@@ -30,12 +29,11 @@ export function AiMindWorld({ quality, accent }: Scene3DProps) {
 
   const pointsRef = useRef<PointsType>(null)
   const nodesRef = useRef<Group>(null)
-  const formation = useRef(0)
 
   const count = Math.floor(quality.particleBudget * 0.85)
   const span = 9
 
-  const { geometry, brain, lattice } = useMemo(() => {
+  const { brain, lattice } = useMemo(() => {
     const random = makeRandom(seedFromString('aiMind'))
     const brainPositions = new Float32Array(count * 3)
     const latticePositions = new Float32Array(count * 3)
@@ -66,16 +64,16 @@ export function AiMindWorld({ quality, accent }: Scene3DProps) {
       latticePositions[i * 3 + 2] = (gz - perAxis / 2) * step * 0.55
     }
 
-    const geo = new BufferGeometry()
-    geo.setAttribute(
-      'position',
-      new BufferAttribute(new Float32Array(brainPositions), 3),
-    )
-
-    return { geometry: geo, brain: brainPositions, lattice: latticePositions }
+    return { brain: brainPositions, lattice: latticePositions }
   }, [count, span])
 
-  useEffect(() => () => geometry.dispose(), [geometry])
+  const { geometry, formation } = useBlendedPositions({
+    from: brain,
+    to: lattice,
+    target: getMindFormation(scene.id, beat),
+    speed: 1.8,
+    reducedMotion: quality.reducedMotion,
+  })
 
   // Scene 9 lights one pipeline stage per beat.
   const layout = getBeatLayout(scene)
@@ -83,18 +81,9 @@ export function AiMindWorld({ quality, accent }: Scene3DProps) {
     scene.id === 'how-ai-works' ? beat - layout.stepsStart : -1
 
   useFrame((_, delta) => {
-    const target = getMindFormation(scene.id, beat)
-    const rate = quality.reducedMotion ? 1 : 1 - Math.exp(-1.8 * delta)
-    formation.current += (target - formation.current) * rate
-
+    // The blend itself — including the guard that stops it rewriting the buffer
+    // once settled — lives in useBlendedPositions. This is what rides along.
     const t = formation.current
-    const attribute = geometry.getAttribute('position') as BufferAttribute
-    const array = attribute.array as Float32Array
-
-    for (let i = 0; i < array.length; i++) {
-      array[i] = brain[i] + (lattice[i] - brain[i]) * t
-    }
-    attribute.needsUpdate = true
 
     if (pointsRef.current && !quality.reducedMotion) {
       // The brain drifts organically; the lattice sits still and mechanical.

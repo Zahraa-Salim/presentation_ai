@@ -15,6 +15,14 @@ export interface ContentReport {
   totalMinutes: number
   totalBeats: number
   todoCount: number
+  /**
+   * Scenes carrying at least one speaker note.
+   *
+   * Tracked separately because an empty `speakerNotes: []` contains no TODO
+   * marker and so is invisible to `todoCount` — presenter mode shipped complete
+   * while 30 of 33 scenes had nothing to show in it, and nothing reported that.
+   */
+  scenesWithSpeakerNotes: number
   perWorld: {
     world: WorldId
     scenes: number
@@ -140,13 +148,28 @@ export function validateContent(): ContentReport {
     countTodo(scene.content.subheadline)
     countTodo(scene.content.statement)
     countTodo(scene.content.note)
-    scene.content.steps?.forEach((step) => countTodo(step.text))
+    // Where most of the merged deck now lives. Left uncounted, the TODO ratchet
+    // was measuring a shrinking fraction of the content it claims to cover.
+    countTodo(scene.content.example)
+    countTodo(scene.content.keyMessage)
+    scene.content.steps?.forEach((step) => {
+      countTodo(step.text)
+      countTodo(step.label)
+    })
+    scene.content.groups?.forEach((group) => {
+      countTodo(group.label)
+      group.items.forEach(countTodo)
+    })
   }
   for (const interaction of INTERACTIONS) {
     countTodo(interaction.promptAr)
     interaction.options.forEach((o) => countTodo(o.label))
     interaction.facilitationAr.forEach(countTodo)
   }
+
+  const scenesWithSpeakerNotes = SCENES.filter(
+    (s) => s.speakerNotes.length > 0,
+  ).length
 
   return {
     errors,
@@ -155,6 +178,7 @@ export function validateContent(): ContentReport {
     totalMinutes,
     totalBeats: getTotalBeats(),
     todoCount,
+    scenesWithSpeakerNotes,
     perWorld,
   }
 }
@@ -179,6 +203,11 @@ export function reportContent(): void {
   if (report.todoCount > 0) {
     console.info(
       `${report.todoCount} content slots still need the original deck.`,
+    )
+  }
+  if (report.scenesWithSpeakerNotes < report.totalScenes) {
+    console.info(
+      `Speaker notes: ${report.scenesWithSpeakerNotes}/${report.totalScenes} scenes. Presenter mode shows an empty panel on the rest.`,
     )
   }
   console.groupEnd()

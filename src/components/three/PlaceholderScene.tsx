@@ -2,7 +2,6 @@ import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import type { Mesh } from 'three'
 import { ParticleField } from '@/components/three/ParticleField'
-import { getCameraPose } from '@/lib/cameraPoses'
 import { seedFromString } from '@/lib/random'
 import type { QualitySettings, Scene3DId } from '@/types'
 
@@ -18,6 +17,10 @@ interface PlaceholderSceneProps {
  * It exists to prove the pipeline — camera, lighting, particles, disposal — not
  * to look like anything. Phases 5–9 replace registry entries one at a time.
  *
+ * Like every world, it is authored around its own local origin. ExperienceCanvas
+ * anchors it at the scene's camera target; anchoring here as well would offset
+ * it twice and put it out of frame.
+ *
  * Glow comes from an emissive material and additive particles rather than a
  * bloom pass, which would cost 4–8ms per frame on integrated graphics.
  */
@@ -27,11 +30,6 @@ export function PlaceholderScene({
   accent,
 }: PlaceholderSceneProps) {
   const meshRef = useRef<Mesh>(null)
-  const pose = getCameraPose(scene3d)
-
-  // Anchor the placeholder at the scene's camera target so each 3D key sits in
-  // its own part of the world and camera moves are actually visible.
-  const [x, y, z] = pose.target
 
   useFrame((_, delta) => {
     if (!meshRef.current || quality.reducedMotion) return
@@ -40,7 +38,7 @@ export function PlaceholderScene({
   })
 
   return (
-    <group position={[x, y, z]}>
+    <group>
       <mesh ref={meshRef} castShadow={quality.shadows}>
         <icosahedronGeometry args={[1.6, 1]} />
         <meshStandardMaterial

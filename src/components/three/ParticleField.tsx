@@ -40,6 +40,18 @@ export function ParticleField({
 
   const count = Math.max(1, Math.floor(quality.particleBudget * density))
 
+  /*
+    Depended on as three numbers, not as the array.
+
+    `center` is an array literal at every call site, so it is a fresh reference
+    on every render — and ExperienceCanvas re-renders on every beat. With the
+    array in the dependency list this useMemo missed every single time: each key
+    press allocated a new Float32Array, built a geometry, uploaded it and threw
+    the old one away. PlaceholderScene backs eight of the twelve environments,
+    so that was most of the deck, for the whole 45 minutes.
+  */
+  const [centerX, centerY, centerZ] = center
+
   const geometry = useMemo(() => {
     const positions = new Float32Array(count * 3)
     // Seeded, so the field looks identical in rehearsal and on the day.
@@ -52,16 +64,16 @@ export function ParticleField({
       const theta = random() * Math.PI * 2
       const phi = Math.acos(2 * random() - 1)
 
-      positions[i * 3] = center[0] + radius * Math.sin(phi) * Math.cos(theta)
+      positions[i * 3] = centerX + radius * Math.sin(phi) * Math.cos(theta)
       positions[i * 3 + 1] =
-        center[1] + radius * Math.sin(phi) * Math.sin(theta) * 0.45
-      positions[i * 3 + 2] = center[2] + radius * Math.cos(phi)
+        centerY + radius * Math.sin(phi) * Math.sin(theta) * 0.45
+      positions[i * 3 + 2] = centerZ + radius * Math.cos(phi)
     }
 
     const geo = new BufferGeometry()
     geo.setAttribute('position', new BufferAttribute(positions, 3))
     return geo
-  }, [count, spread, center, seed])
+  }, [count, spread, centerX, centerY, centerZ, seed])
 
   // Manually created geometry is not auto-disposed. This runs for 45 minutes
   // straight, so a leak here accumulates across every scene change.

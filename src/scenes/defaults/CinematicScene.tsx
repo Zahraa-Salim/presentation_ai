@@ -20,6 +20,14 @@ export function CinematicScene({ scene }: { scene: SceneDef }) {
 
   const { headline, statement, steps, note } = scene.content
 
+  /*
+    Compare against what is actually on screen, not the raw headline. The
+    finale has no headline and falls back to its title — which IS its
+    statement — so guarding on `headline` printed the closing line twice, with
+    the punchline visible from beat 0 while the four lines built toward it.
+  */
+  const displayed = headline ?? scene.title
+
   return (
     <div className="flex h-full flex-col items-center justify-center gap-10 text-center">
       <motion.h1
@@ -28,7 +36,7 @@ export function CinematicScene({ scene }: { scene: SceneDef }) {
         transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         className="text-display max-w-5xl font-bold text-balance text-bright glow-text"
       >
-        {headline ?? scene.title}
+        {displayed}
       </motion.h1>
 
       {steps && steps.length > 0 && (
@@ -45,7 +53,7 @@ export function CinematicScene({ scene }: { scene: SceneDef }) {
         </div>
       )}
 
-      {statement && statement !== headline && (
+      {statement && statement !== displayed && (
         <motion.p
           initial={false}
           animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 16 }}

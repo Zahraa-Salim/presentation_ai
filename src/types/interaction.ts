@@ -10,7 +10,7 @@ export const INTERACTION_IDS = [
   'mind-reader', // B — "أنا متوتر." → Context reveal
   'prompt-lab', // C — weak prompt → Context + Goal + Constraints + Output
   'tool-explorer', // D — pick a task, see the fitting tools
-  'study-companion', // E — اشرح / اختبرني / اعمل خطة / مثال / صححلي
+  'study-companion', // E — Tutor / Quiz Partner / Study Planner / …
   'privacy-sorter', // F — SAFE TO SHARE vs DON'T SHARE
   'real-or-fake', // G — مين الحقيقي؟
   'dependency', // H — إذا اختفى AI لمدة أسبوع؟
@@ -50,4 +50,12 @@ export interface InteractionDef {
   estimatedSec: number
   /** Arabic guidance for the presenter on how to run it live. */
   facilitationAr: string[]
+  /**
+   * Arabic verdict wording for interactions that judge each option.
+   *
+   * The generic default is صح / خطأ, which is right for a quiz and wrong for
+   * the Privacy Sorter — there, `correct` means "safe to share", not "the right
+   * answer". Lives here rather than in the component because it is copy.
+   */
+  verdictAr?: { correct: string; incorrect: string }
 }

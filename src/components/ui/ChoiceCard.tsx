@@ -1,4 +1,5 @@
 import { Check, X } from 'lucide-react'
+import { latinClass, latinLang } from '@/lib/direction'
 
 export type ChoiceState =
   | 'idle'
@@ -29,6 +30,12 @@ const VERDICTS: Partial<
   incorrect: { icon: X, labelAr: 'خطأ', tone: 'text-danger' },
 }
 
+/** Overrides for interactions where "right answer" is the wrong idea. */
+export interface VerdictLabels {
+  correct: string
+  incorrect: string
+}
+
 interface ChoiceCardProps {
   /** Arabic label for the choice. */
   label: string
@@ -37,6 +44,8 @@ interface ChoiceCardProps {
   state?: ChoiceState
   /** 1-based number-key hint shown to the presenter. */
   choiceKey?: number
+  /** Replaces صح / خطأ where those words would misdescribe the verdict. */
+  verdictLabels?: VerdictLabels
   onSelect?: () => void
   disabled?: boolean
   className?: string
@@ -47,12 +56,19 @@ export function ChoiceCard({
   caption,
   state = 'idle',
   choiceKey,
+  verdictLabels,
   onSelect,
   disabled = false,
   className = '',
 }: ChoiceCardProps) {
   const verdict = VERDICTS[state]
   const VerdictIcon = verdict?.icon
+  const verdictLabel =
+    state === 'correct'
+      ? (verdictLabels?.correct ?? verdict?.labelAr)
+      : state === 'incorrect'
+        ? (verdictLabels?.incorrect ?? verdict?.labelAr)
+        : verdict?.labelAr
 
   return (
     <button
@@ -68,15 +84,29 @@ export function ChoiceCard({
         </kbd>
       )}
 
+      {/* Several choice lists are Latin — Password, OTP, Tutor, Quiz Partner —
+          so the typeface is chosen per string rather than for the component. */}
       <span className="flex-1">
-        <span className="text-lead font-medium">{label}</span>
-        {caption && <span className="text-body mt-1 block text-soft">{caption}</span>}
+        <span
+          lang={latinLang(label)}
+          className={`text-lead font-medium ${latinClass(label)}`}
+        >
+          {label}
+        </span>
+        {caption && (
+          <span
+            lang={latinLang(caption)}
+            className={`text-body mt-1 block text-soft ${latinClass(caption)}`}
+          >
+            {caption}
+          </span>
+        )}
       </span>
 
       {verdict && VerdictIcon && (
         <span className={`flex shrink-0 items-center gap-2 ${verdict.tone}`}>
           <VerdictIcon className="size-5" aria-hidden />
-          <span className="text-caption font-semibold">{verdict.labelAr}</span>
+          <span className="text-caption font-semibold">{verdictLabel}</span>
         </span>
       )}
     </button>

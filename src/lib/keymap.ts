@@ -87,7 +87,15 @@ export function resolveKeyIntent(event: KeyEventLike): NavIntent | null {
   return binding?.intent ?? null
 }
 
-/** Most choice lists have six options (Tool Explorer, careers). */
+/**
+ * The longest pick-one list in the deck: six careers.
+ *
+ * Deliberately not raised for the Privacy Sorter's twelve items. A digit can
+ * address ten options at the very most, so no cap makes twelve reachable — and
+ * the sorter is not a pick-one anyway. It sorts items into two buckets, so it
+ * belongs on the beat model like the Prompt Lab, not on number keys. A test in
+ * `content.test.ts` holds every pick-one interaction to this number.
+ */
 export const MAX_CHOICE_KEY = 6
 
 /**

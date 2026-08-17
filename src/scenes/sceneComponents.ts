@@ -33,7 +33,7 @@ export const DEFAULT_SCENE_COMPONENTS: Record<SceneType, SceneComponent> = {
  */
 export const SCENE_COMPONENTS: Partial<Record<string, SceneComponent>> = {
   // Needs DOM-rendered milestone labels mirroring the 3D timeline.
-  'ai-not-new': HistoryScene,
+  'ai-is-not-new': HistoryScene,
   // Five pipeline stages advancing in step with the 3D lattice.
   'how-ai-works': HowAiWorksScene,
 }

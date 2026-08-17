@@ -25,7 +25,24 @@ export const CAMERA_POSES: Record<Scene3DId, CameraPose> = {
 
   // World 1 — AI World
   opening: { position: [0, 0.5, 14], target: [0, 0, 0], fov: 55 },
-  aiHistory: { position: [6, 1.5, 12], target: [2, 0, 0], fov: 50 },
+  /*
+    Head-on, deliberately: camera and target share y and x, so the view axis is
+    parallel to -Z. The timeline is a line along X, so it then lies at a
+    constant depth and projects as a perfectly horizontal row with perfectly
+    even spacing — which is what lets the orbs sit above matching DOM columns.
+
+    An oblique pose (the previous [6, 1.5, 12] → [2, 0, 0]) makes the same line
+    recede: it projects as a diagonal, spacing compresses toward the far end,
+    and the orbs drift off their labels.
+
+    Distance is tuned, not arbitrary. At fov 50 and 16:9 the frame is
+    2 · 9.7 · tan(25°) · 16/9 ≈ 16.1 world units wide, so the 11.2-unit
+    centre-to-centre span of the orbs covers ~69.5% of it — which is exactly
+    what the DOM row covers (content box is 100% − 2 · 7vw, split into five
+    flex-1 columns). 1920×1080 and 1366×768 are both 16:9 and both use the
+    7vw padding step, so one tuning serves both.
+  */
+  aiHistory: { position: [2, 0, 9.7], target: [2, 0, 0], fov: 50 },
 
   // World 2 — AI Lab
   aiMind: { position: [24, 1, 10], target: [22, 0, 0], fov: 45 },

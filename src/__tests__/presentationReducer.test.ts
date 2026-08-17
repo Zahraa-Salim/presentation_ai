@@ -13,8 +13,11 @@ const key = (s: PresentationState) => `${s.sceneIndex}:${s.beat}`
 const LAST = SCENES.length - 1
 
 describe('beat counts', () => {
-  it('totals 59 beats across the deck', () => {
-    expect(getTotalBeats()).toBe(59)
+  /* Pinned so an accidental change is visible. It moves legitimately as the
+     deck is transcribed — each list the deck supplies becomes a reveal step —
+     so update it deliberately, never to make a red test go green. */
+  it('totals 146 beats across the deck', () => {
+    expect(getTotalBeats()).toBe(146)
   })
 
   it('gives the finale 6 beats — 4 steps plus its statement', () => {
@@ -25,16 +28,27 @@ describe('beat counts', () => {
     expect(beats[0]).toBe(2)
   })
 
-  it('gives the prompt-lab scene 5 beats — one per build stage', () => {
-    expect(beats[17]).toBe(5)
+  it('gives the prompt-lab scene 6 beats — one per build stage, then its takeaway', () => {
+    expect(beats[17]).toBe(6)
   })
 
-  it('gives the pipeline scene 6 beats — one per stage', () => {
-    expect(beats[8]).toBe(6)
+  it('gives the pipeline scene 7 beats — one per stage, then its takeaway', () => {
+    expect(beats[8]).toBe(7)
   })
 
-  it('gives a plain fade scene with no steps a single beat', () => {
-    expect(beats[2]).toBe(1)
+  /* Structural rather than pinned to a scene index: which scenes are bare
+     changes as the deck lands, but the rule that a bare scene rests at one
+     beat does not. */
+  it('gives a scene with nothing to reveal exactly one beat', () => {
+    const bare = SCENES.filter(
+      (s) =>
+        !s.content.steps?.length &&
+        !s.content.groups?.length &&
+        !s.interaction &&
+        s.transition !== 'statementReveal',
+    )
+    expect(bare.length).toBeGreaterThan(0)
+    expect(bare.every((s) => getSceneBeatCount(s) === 1)).toBe(true)
   })
 
   it('never produces a scene with zero beats', () => {
