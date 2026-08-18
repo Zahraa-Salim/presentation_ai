@@ -85,8 +85,22 @@ export interface SceneContent {
    * Rendered as a quotation, not as body copy.
    */
   example?: string
-  /** Progressive reveals, advanced by the presenter. */
+  /** Progressive reveals. See `pacing` for whether they cost a key press. */
   steps?: RevealStep[]
+  /**
+   * How `steps` arrive.
+   *
+   * `'auto'` (the default) cascades them in on their own, a fraction of a
+   * second apart, the moment the scene does. Seven single words should not cost
+   * seven presses.
+   *
+   * `'stepped'` gives each one its own beat, for the four places where that is
+   * the design rather than an inconvenience: scenes 4 and 9, where a 3D
+   * milestone or pipeline node lights with each line; scene 17, where the
+   * machine's beam focuses as each part of the prompt is named; and the finale,
+   * where the pause between the four closing lines IS the ending.
+   */
+  pacing?: 'auto' | 'stepped'
   /** Two or three labelled columns, revealed one per beat. */
   groups?: ContentGroup[]
   /** The single sentence used by 'statementReveal' transitions. */
@@ -130,6 +144,16 @@ export interface PresentationState {
   beat: number
   /** Last movement. Transitions and RTL mirroring read this. */
   direction: 1 | -1
+  /**
+   * The closing coda — the deck's five core rules, which belong to no scene.
+   *
+   * `null` while the deck is being presented; `0` is the coda at rest and
+   * `1..CORE_RULES.length` reveal the rules one press each. It is deliberately
+   * *not* a 34th scene: the 33 already total exactly 2700s, and keeping
+   * `sceneIndex` pinned to the finale means the progress bar, presenter pacing
+   * and the finale 3D all carry on unchanged behind it.
+   */
+  coda: number | null
 }
 
 export type PresentationAction =

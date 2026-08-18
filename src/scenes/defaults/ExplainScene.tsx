@@ -36,7 +36,7 @@ export function ExplainScene({ scene }: { scene: SceneDef }) {
           {steps.map((step, index) => (
             <RevealText
               key={step.id}
-              step={layout.stepsStart + index}
+              stepIndex={index}
               emphasis={step.emphasis}
             >
               {step.label && (

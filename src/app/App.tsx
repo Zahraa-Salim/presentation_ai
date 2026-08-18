@@ -1,6 +1,7 @@
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import { MotionConfig } from 'motion/react'
 import { NavigationSurface } from '@/components/presentation/NavigationSurface'
+import { Coda } from '@/components/presentation/Coda'
 import { PresentationChrome } from '@/components/presentation/PresentationChrome'
 import { PresentationProvider } from '@/components/presentation/PresentationProvider'
 import { PresenterClockTracker } from '@/components/presentation/PresenterClockTracker'
@@ -298,13 +299,25 @@ function HarnessButton({
  * the default.
  */
 function PresentationStage() {
+  const { isCoda } = usePresentation()
+
   return (
     // Explicitly above the canvas. This used to rely on DOM order alone, which
     // works until someone reorders AppInner's children.
     <div className="absolute inset-0 z-[var(--z-scene)]">
-      <SceneTransition>
-        <SceneRenderer />
-      </SceneTransition>
+      {/*
+        Past the deck's end. Not wrapped in SceneTransition: the scene has not
+        changed — the finale is still current and still rendering in the canvas
+        behind — so a scene transition here would animate a change that did not
+        happen.
+      */}
+      {isCoda ? (
+        <Coda />
+      ) : (
+        <SceneTransition>
+          <SceneRenderer />
+        </SceneTransition>
+      )}
     </div>
   )
 }
@@ -377,6 +390,9 @@ function AppInner({ fullscreen }: { fullscreen: FullscreenApi }) {
           demoEmotion={showHarness ? novaEmotion : undefined}
         />
       </Suspense>
+
+      {/* Between the world and the words — see `scene-scrim`. */}
+      <div aria-hidden className="scene-scrim" />
 
       <PresenterClockTracker />
 

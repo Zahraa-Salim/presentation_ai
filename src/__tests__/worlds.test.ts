@@ -212,18 +212,17 @@ describe('interaction registry coverage', () => {
     'utf8',
   )
 
-  it('builds every interaction the deck can support', () => {
+  it('builds all nine', () => {
     const unbuilt = INTERACTION_IDS.filter(
       (id) => !new RegExp(`['"]?${id}['"]?\\s*:`).test(registry),
     )
-    // Real-or-Fake is blocked: the deck names the threats but supplies no pair
-    // to compare, so its two options are still TODO. See PROJECT-STATUS.md §7.
-    expect(unbuilt).toEqual(['real-or-fake'])
+    expect(unbuilt).toEqual([])
   })
 
-  it('leaves the blocked one commented, not silently missing', () => {
-    expect(registry).toContain('real-or-fake')
-    expect(registry).toMatch(/blocked/i)
+  /* Complete, but the fallback stays: a missing entry must never take a live
+     presentation down over a future edit to that map. */
+  it('keeps the map sparse-typed so a gap degrades instead of crashing', () => {
+    expect(registry).toMatch(/Partial<\s*\n?\s*Record<InteractionId/)
   })
 })
 

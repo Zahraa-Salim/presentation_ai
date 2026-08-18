@@ -269,16 +269,14 @@ describe('World 2 pipeline', () => {
 
 describe('content gaps are tracked, not hidden', () => {
   /*
-    The deck has landed, taking this from 85 to a handful. What remains is what
-    the deck genuinely does not contain — the Real-or-Fake pair, the Tool
-    Explorer's per-task suggestions, the Study Companion's role prompts, and the
-    entrepreneurship line before the finale. See PROJECT-STATUS.md §7.
-
-    If this rises, content was added as TODO rather than filled in.
+    85 → 0. The deck filled most of it; content-2.json supplied the column
+    headings and speaker notes it lacked, and content-3.json the Real-or-Fake
+    pair, the tool list and the closing entrepreneurship line.
   */
-  it('reports the outstanding count so nothing ships as silent placeholder', () => {
-    const report = validateContent()
-    expect(report.todoCount).toBeLessThanOrEqual(8)
+  /* Closed. Every slot is filled, so this is an equality now rather than a
+     ceiling: a new TODO is a regression, not a known debt being worked down. */
+  it('has no outstanding content gaps at all', () => {
+    expect(validateContent().todoCount).toBe(0)
   })
 
   /*

@@ -33,7 +33,9 @@ export function Card({
 }: CardProps) {
   return (
     <div
-      className={`rounded-card border p-6 transition-colors duration-(--dur-fast) ${
+      /* text-shadow is inherited from scene-frame, where it earns its keep over
+         the 3D. On a solid panel it only muddies the type, so it stops here. */
+      className={`rounded-card border p-6 [text-shadow:none] transition-colors duration-(--dur-fast) ${
         SURFACES[surface]
       } ${active ? 'border-accent glow-sm' : ''} ${className}`}
       {...rest}

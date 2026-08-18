@@ -1,9 +1,10 @@
 import { ArrowDown, ArrowUp, Check, RotateCcw } from 'lucide-react'
 import { Badge } from '@/components/ui'
+import { CORE_RULES } from '@/data/coreRules'
 import { SCENES, SCENE_TYPE_LABELS_AR } from '@/data/scenes'
 import { usePresentation } from '@/hooks/usePresentation'
 import { usePresenterClock } from '@/hooks/usePresenterClock'
-import { FORWARD_ARROW } from '@/lib/direction'
+import { FORWARD_ARROW, latinClass, latinLang } from '@/lib/direction'
 import {
   TOTAL_BUDGET_SEC,
   formatClock,
@@ -189,9 +190,51 @@ function PresenterNextScene({
   )
 }
 
+/**
+ * Replaces the speaker notes once past the deck. The presenter voices one rule
+ * per press, so what they need on screen is which one is showing and which one
+ * is next — the rules themselves are already projected.
+ */
+function PresenterCoda({ step }: { step: number }) {
+  return (
+    <div className="max-h-[30vh] overflow-y-auto overscroll-contain px-6 py-4">
+      <p className="text-caption pb-2 text-muted">
+        القواعد الخمسة ·{' '}
+        <span dir="ltr" className="tabular-nums latin">
+          {step}/{CORE_RULES.length}
+        </span>
+      </p>
+      <ol className="flex flex-col gap-1">
+        {CORE_RULES.map((rule, index) => {
+          const shown = step > index
+          const current = step === index + 1
+          return (
+            <li
+              key={rule.id}
+              lang={latinLang(rule.title)}
+              className={`text-body ${latinClass(rule.title)} ${
+                current ? 'text-bright' : shown ? 'text-soft' : 'text-muted'
+              }`}
+            >
+              {/* Marked with a glyph, not colour alone. */}
+              <span aria-hidden>{current ? '▸ ' : shown ? '· ' : '  '}</span>
+              {rule.title}
+            </li>
+          )
+        })}
+      </ol>
+    </div>
+  )
+}
+
 export function PresenterOverlay() {
-  const { scene, sceneNumber, beat, beatCount, isLastScene } = usePresentation()
-  const next = isLastScene ? null : SCENES[sceneNumber]
+  const { scene, sceneNumber, beat, beatCount, isLastScene, coda } =
+    usePresentation()
+
+  /* The coda sits between scenes 32 and 33, so on 32 the next press is the
+     recap rather than the next scene, and from inside the recap it is 33. */
+  const codaIsNext = coda === null && sceneNumber === SCENES.length - 1
+  const next = coda !== null ? SCENES[SCENES.length - 1] : isLastScene ? null : SCENES[sceneNumber]
 
   return (
     <aside
@@ -209,15 +252,30 @@ export function PresenterOverlay() {
         beatCount={beatCount}
       />
 
-      <PresenterNotes notes={scene.speakerNotes} />
+      {coda === null ? (
+        <PresenterNotes notes={scene.speakerNotes} />
+      ) : (
+        <PresenterCoda step={coda} />
+      )}
 
-      {next && (
-        <PresenterNextScene
-          sceneNumber={next.index}
-          title={next.title}
-          typeLabel={SCENE_TYPE_LABELS_AR[next.type]}
-          durationSec={next.durationSec}
-        />
+      {/* Named rather than left blank, so the recap is discoverable instead of
+          arriving as a surprise at minute forty-three. */}
+      {codaIsNext ? (
+        <div className="border-t border-line px-6 py-3">
+          <p className="text-caption text-muted">
+            التالي {FORWARD_ARROW}{' '}
+            <span className="text-soft">القواعد الخمسة</span> · خارج الوقت المحسوب
+          </p>
+        </div>
+      ) : (
+        next && (
+          <PresenterNextScene
+            sceneNumber={next.index}
+            title={next.title}
+            typeLabel={SCENE_TYPE_LABELS_AR[next.type]}
+            durationSec={next.durationSec}
+          />
+        )
       )}
     </aside>
   )

@@ -32,6 +32,8 @@ const readJson = (name: string) =>
 const deck = readJson('content.json')
 /** Headings and speaker notes, authored separately when the deck lacked them. */
 const authored = readJson('content-2.json')
+/** The last gaps: the Real-or-Fake pair, the tool list, the closing line. */
+const lateGaps = readJson('content-3.json')
 
 /*
   Trailing punctuation differs freely between a title and a reference to it —
@@ -89,6 +91,13 @@ const authoredStrings = collect([
   ...Object.values(
     authored.speakerNotes as Record<string, string[]>,
   ).flat(),
+  ...Object.values(
+    lateGaps.realOrFake.options as Record<string, string>,
+  ),
+  ...(lateGaps.realOrFake.tells as string[]),
+  ...(lateGaps.toolExplorer as string[]),
+  ...(lateGaps.studyCompanion as string[]),
+  lateGaps.entrepreneurship as string,
 ])
 
 /** Everything the author has written down anywhere. */
@@ -129,7 +138,7 @@ const codeStrings = collect([
 const CODE_ONLY = new Map<string, string>([
   [
     normalise('مين الحقيقي؟'),
-    'Real-or-Fake prompt. Predates content.json — it comes from the original brief, and the deck supplies no replacement. Its two options are still TODO.',
+    'Real-or-Fake prompt. Predates content.json — it comes from the original brief, and the deck supplies no replacement. Its two items were authored later, in content-3.json.',
   ],
   [
     normalise('Context → Goal → Constraints → Output'),
@@ -176,6 +185,75 @@ describe('the deck reaches the screen', () => {
       dropped,
       `Written but never shown:\n${dropped.map((s) => `  · ${s}`).join('\n')}`,
     ).toEqual([])
+  })
+})
+
+/**
+ * The coda renders the five core rules, and it is the first screen in the deck
+ * whose copy comes from a component rather than from a scene. The two-way diff
+ * above reads `src/data/` — a rule title typed into the JSX would sail past it
+ * completely, which is precisely the class of defect that already shipped twice
+ * here. So the guard is structural: the component must read the data.
+ */
+describe('the coda shows the deck, not its own words', () => {
+  const source = (relative: string) =>
+    readFileSync(
+      fileURLToPath(new URL(`../${relative}`, import.meta.url)),
+      'utf8',
+    )
+
+  it.each([
+    ['components/presentation/Coda.tsx'],
+    ['components/presentation/PresenterOverlay.tsx'],
+  ])('%s reads CORE_RULES rather than restating it', (file) => {
+    const text = source(file)
+    expect(text).toContain("from '@/data/coreRules'")
+
+    for (const rule of CORE_RULES) {
+      expect(text, `${file} hardcodes "${rule.title}"`).not.toContain(rule.title)
+      expect(text, `${file} hardcodes a rule body`).not.toContain(rule.body)
+    }
+  })
+
+  it('renders every rule, not the first few', () => {
+    // A slice() would look right on screen until the fifth rule went missing
+    // in front of a class.
+    expect(source('components/presentation/Coda.tsx')).toContain('CORE_RULES.map')
+  })
+})
+
+/**
+ * Scene 27 lists five Cybersecurity threats and has its own renderer. Both
+ * facts have already caused a defect: the threats once consumed five beats and
+ * displayed nothing — five presses that visibly did nothing in front of a
+ * class — because the interactive renderer never drew `content.steps`.
+ */
+describe('scene 27 draws the threats it lists', () => {
+  const source = readFileSync(
+    fileURLToPath(new URL('../scenes/privacy/CyberScene.tsx', import.meta.url)),
+    'utf8',
+  )
+
+  const threats =
+    SCENES.find((s) => s.id === 'ai-cybersecurity')?.content.steps ?? []
+
+  it('has five threats to draw', () => {
+    expect(threats).toHaveLength(5)
+  })
+
+  it('maps them from the scene rather than listing them again', () => {
+    expect(source).toContain('steps.map')
+    for (const threat of threats) {
+      expect(source, `CyberScene hardcodes "${threat.text}"`).not.toContain(
+        threat.text,
+      )
+    }
+  })
+
+  it('reveals them through the shared timing, not its own arithmetic', () => {
+    // getStepTiming is what makes them honour the scene's pacing; open-coding
+    // the comparison is how a scene drifts out of step with the beat model.
+    expect(source).toContain('getStepTiming')
   })
 })
 

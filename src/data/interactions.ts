@@ -1,12 +1,12 @@
 import type { InteractionDef, InteractionId } from '@/types'
-import { TODO } from '@/lib/todo'
 
 /**
  * The nine classroom interactions (A–I).
  *
- * Prompts and choice lists below are taken from the brief. Everything the
- * brief did not specify — facilitation notes, result copy — is marked TODO
- * pending the original deck.
+ * Every prompt, choice and facilitation line is the author's: from the deck
+ * where it supplied one, and from content-3.json for the handful it did not —
+ * the Real-or-Fake pair, the Tool Explorer's suggestions, the Study Companion's
+ * example prompts. Nothing here is invented.
  *
  * All interactions are presenter-driven: one projected screen, mouse and
  * keyboard, no student devices, no backend, no live voting.
@@ -73,7 +73,14 @@ export const INTERACTIONS: readonly InteractionDef[] = [
       { id: 'build', label: 'بدي أبني فكرة مشروع.' },
     ],
     estimatedSec: 90,
-    facilitationAr: [TODO('الأدوات المقترحة لكل مهمة من المهام الخمس')],
+    // One line per task, in the same order as the options above.
+    facilitationAr: [
+      'للدراسة: ChatGPT أو Claude أو Gemini — للشرح، التلخيص، والأسئلة التدريبية.',
+      'للـResearch: Gemini أو ChatGPT — للبحث وتنظيم الأفكار، مع التحقق من المصادر.',
+      'للـPresentation: Canva AI أو Gamma — لتوليد الأفكار والتصميم بسرعة.',
+      'لفهم Code: ChatGPT أو Claude أو Copilot — لشرح Code وDebugging والتعلّم.',
+      'لفكرة مشروع: ChatGPT أو Claude — للعصف الذهني، دراسة الفكرة، وبناء خطة أولية.',
+    ],
   },
   {
     id: 'study-companion',
@@ -88,7 +95,14 @@ export const INTERACTIONS: readonly InteractionDef[] = [
       { id: 'brainstorming-partner', label: 'Brainstorming Partner' },
     ],
     estimatedSec: 90,
-    facilitationAr: [TODO('شو بتكتب للـ AI ليلعب كل دور من الأدوار الخمسة')],
+    // One example prompt per role, in the same order as the options above.
+    facilitationAr: [
+      'Tutor: اشرحلي هالموضوع كأني طالب صف 11، وبطريقة بسيطة، وإذا ما فهمتني جرّب طريقة ثانية.',
+      'Quiz Partner: اختبرني بـ5 أسئلة عن هالموضوع، سؤال سؤال، وما تعطيني الجواب قبل ما جاوب.',
+      'Study Planner: عندي امتحان بعد 5 أيام بهالمواضيع، ساعدني أعمل خطة دراسة واقعية.',
+      'Language Partner: احكي معي بالإنجليزي عن هالموضوع، وصححلي أخطائي بعد كل جواب.',
+      'Brainstorming Partner: عندي هالفكرة للمشروع، ساعدني أطلع 5 أفكار مختلفة وأخبرني شو نقاط القوة والضعف بكل واحدة.',
+    ],
   },
   {
     id: 'privacy-sorter',
@@ -121,15 +135,35 @@ export const INTERACTIONS: readonly InteractionDef[] = [
     kind: 'quiz',
     sceneId: 'ai-cybersecurity',
     promptAr: 'مين الحقيقي؟',
-    options: [TODO('الخيار الأول'), TODO('الخيار الثاني')].map((label, i) => ({
-      id: `option-${i + 1}`,
-      label,
-    })),
+    /*
+      Two messages a Lebanese student might really receive, deliberately hard to
+      separate at a glance — an obviously fake fake would teach nothing, and the
+      scene's own line is `مش كل شي بيبين حقيقي… حقيقي.`
+    */
+    options: [
+      {
+        id: 'option-1',
+        label:
+          'وصلتك رسالة من المدرسة على المنصة الرسمية: تذكير إن آخر موعد لتسليم المشروع يوم الخميس، ومعها رابط المنصة المعتاد.',
+        correct: true,
+      },
+      {
+        id: 'option-2',
+        label:
+          'وصلتك رسالة من حساب بيشبه حساب المدرسة: "مبروك! ربحت اشتراك مجاني. سجّل دخولك من هالرابط خلال ساعة لتأكيد الجائزة."',
+        correct: false,
+      },
+    ],
     estimatedSec: 120,
-    // The deck names the threats but supplies no pair to compare, so the two
-    // items above stay open. Threats: Phishing · Fake accounts ·
-    // AI-generated scams · Deepfakes · Impersonation.
-    facilitationAr: [TODO('علامات التزوير التي يجب لفت النظر إليها')],
+    // The tells — what gives the fake away once you know to look. This is what
+    // the class takes home; the threats it covers are Phishing, fake accounts,
+    // AI-generated scams, deepfakes and impersonation.
+    facilitationAr: [
+      'الحساب أو الرابط مش هو نفسه الحساب أو الموقع الرسمي، حتى لو الاسم والصورة بيشبهوا الأصلي.',
+      'الاستعجال أو التهديد أو وعد بجائزة كبيرة علامة لازم توقف عندها قبل ما تضغط.',
+      'قبل ما تدخل Password أو OTP، افتح الموقع أو التطبيق الرسمي بنفسك وتأكد من المصدر.',
+    ],
+    verdictAr: { correct: 'حقيقي', incorrect: 'مزوّر' },
   },
   {
     id: 'dependency',

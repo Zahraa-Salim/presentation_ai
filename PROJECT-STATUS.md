@@ -1,6 +1,6 @@
 # PROJECT STATUS — Interactive AI Education Experience
 
-**Last updated:** 2026-08-17 — **the source deck has landed and is merged**
+**Last updated:** 2026-08-18 — **ready for the rehearsal**
 **Project:** 45-minute Arabic-first interactive AI lesson for Grade 11, Lebanon
 **Core message:** خلي AI يساعدك، مش يفكّر بدالك.
 
@@ -9,32 +9,71 @@ decision made and why, what is still missing, and how to continue.
 
 ---
 
+## ▶ RESUME HERE
+
+**Everything that can be done at the keyboard is done.** What is left needs the
+room.
+
+> **Run the rehearsal.** `npm run build && npm run preview`, open
+> `http://localhost:4173/?perf=1`, press `F` then `P`, and present all 33 scenes
+> **out loud**. Write the clock at the end of scenes 5, 10, 21, 28 and 33 —
+> targets 5:00 / 13:00 / 26:00 / 37:00 / 45:00. Then click the corner readout
+> for the frame-rate table, and walk it a second time with reduced motion on.
+>
+> Full instructions: **`REHEARSAL.md`** — read §1 before you start.
+
+You no longer have to watch the FPS meter while presenting; the run records
+itself per world (§13). Everything else waits on the run: Task 30 has nothing to
+act on until it says what to polish, and Task 27's remaining half *is* those
+numbers. Task 32 (Vercel) needs an account and nothing else.
+
+**The four scenes to judge hardest** — all now one beat, one screen, no press:
+
+| | | |
+|---|---|---|
+| 16 · `weak-prompt` | 55s | The note asks the class *«شو ناقص؟»* while all three answers are already on screen |
+| 22 · `is-chatgpt-a-friend` | 70s | `بس… هل هيدا يعني إنه صاحبك؟` is a pivot marked `strong`; cascaded, the turn never happens |
+| 3 · `ai-is-everywhere` | 50s | Seven single words arriving at once |
+| 11 · `tools-overview` | 50s | The deck gives it nothing more to reveal |
+
+Each is one line (`pacing: 'stepped'`) to fix. **Judge them live first.**
+
+**Nothing is half-finished.** Every gate is green, no `TODO` markers remain, and
+no work is mid-flight.
+
+---
+
 ## 1. WHERE WE ARE
 
-**Tasks 00–12 complete**, plus the presentation-mode fix and the test migration.
+**Tasks 00–28 and 31 complete. Task 26 dropped.**
 
-**All 33 scenes walk end to end.** Worlds 3–5 render through generic type-based
-renderers with visible `⟦TODO⟧` markers and placeholder 3D until their own
-tasks. You can present the whole deck today — the content is what's missing, not
-the mechanics.
+**The presentation is content-complete and structurally finished.** All 33
+scenes, all 9 interactions, all 11 3D environments, zero `⟦TODO⟧` markers. What
+remains is a timed rehearsal, whatever polish it surfaces, and deployment.
 
 | Metric | Value |
 |---|---|
-| Source files | 86 |
+| Source files | 122 |
 | Scenes | 33 (all render) |
-| Beats (key presses to walk the deck) | **146** |
+| Beats (key presses to walk the deck) | **106** — lists cascade in, they no longer cost a press |
 | Runtime budget | exactly 2700s = 45.0 min |
 | 3D worlds built | **all 11** — no scene renders a placeholder |
-| Interactions built | **8 of 9** — only Real-or-Fake is left, blocked on content |
-| **Tests** | **478 passing, 15 files, in-repo (Vitest)** |
-| Content gaps (`⟦TODO⟧`) | **5** (was 85) |
-| Bundle | entry 256.06 kB (gzip 79.57) · three 884.05 · motion 128.66 |
+| Interactions built | **all 9** |
+| **Tests** | **571 passing, 17 files, in-repo (Vitest)** |
+| Content gaps (`⟦TODO⟧`) | **0** (was 85) |
+| Bundle | entry 277.08 kB (gzip 85.14) · three 887.76 · motion 128.66 · 1.6 MB total |
 
 Gates all green: `typecheck` 0 errors · `lint` 0 errors · `build` succeeds ·
-`test` 478/478.
+`test` 571/571.
 
-**The whole deck now has real Arabic content.** Worlds 3–5 still render on
-generic type-based renderers and placeholder 3D, but they say the right things.
+Between scenes 32 and 33 sits the **coda** — the deck's five core rules, reached
+by pressing on from the careers scene. It is deliberately not a 34th scene;
+see §14.
+
+**Every word on screen is the author's** — from `content.json` where the deck
+supplied it, and from `content-2.json` / `content-3.json` for the slots it did
+not. `deckFidelity.test.ts` proves it in both directions: nothing invented,
+nothing dropped.
 
 ---
 
@@ -104,45 +143,55 @@ Legend: ✅ done · ⬜ not started · 🔒 blocked on source deck
 | — | **Source deck merged** | ✅ | See §7. Gaps 85 → 5, beats 59 → 118 |
 | 13 | Prompt Lab interaction | ✅ | 4 beats, one per stage. `aiMachine` 3D still placeholder |
 | 14 | World 3 — Study Lab | ✅ | `toolCity` + `studyLab` 3D |
-| 15 | AI Tool Explorer | ✅ | Built on `ChoiceReveal`. Its 5 facilitation lines are still TODO |
-| 16 | Study Companion | ✅ | Built on `ChoiceReveal`. Its 5 facilitation lines are still TODO |
+| 15 | AI Tool Explorer | ✅ | Built on `ChoiceReveal`; `tools.ts` now holds 11 tools |
+| 16 | Study Companion | ✅ | Built on `ChoiceReveal`, all 5 example prompts supplied |
 | 17 | World 4 — Privacy | ✅ | `privacyVault` + `cyberCity` 3D |
 | 18 | Privacy Sorter | ✅ | 12 items, click to flip. `privacyVault` 3D still placeholder |
-| 19 | Cybersecurity / Real-or-Fake | 🔒 | **The one genuinely blocked interaction** — deck supplies no pair |
+| 19 | Cybersecurity / Real-or-Fake | ✅ | Two messages, verdict withheld until the reveal |
 | 20 | World 5 — Future City | ✅ | `dependency` + `futureCity` 3D |
 | 21 | Dependency experience | ✅ | Built on `ChoiceReveal`, all 4 lines supplied |
 | 22 | Future City careers | ✅ | Built on `ChoiceReveal`, all 6 lines supplied |
-| 23 | Entrepreneurship | 🔒 | |
+| 23 | Entrepreneurship | ✅ | One line before the closing sequence |
 | 24 | Final cinematic | ✅ | `finale` 3D — five world accents converging |
 | 25 | Presenter mode (`P`) | ✅ | Overlay with timer, pacing badge, notes, next scene. See §11 |
 | 26 | ~~Audio~~ | ❌ | **Dropped 2026-08-17 — the presentation is silent.** Never built; scaffolding removed |
-| 27 | Performance pass | ⬜ | |
+| 27 | Performance pass | ⬜ | Engineering side done; the rehearsal now records its own per-world numbers (§13) |
 | 28 | Accessibility pass | ✅ | Reduced-motion chain now enforced; canvas hidden from AT; Latin runs marked `lang="en"` |
-| 29 | Full rehearsal | ⬜ | **Can be done now** — all 33 walk, and presentation mode makes it viable |
+| 29 | Full rehearsal | ⬜ | **Instrumented and ready.** See `REHEARSAL.md` |
 | 30 | Final polish | ⬜ | |
 | 31 | Production build verification | ✅ | Offline verified end to end; guarded by `offline.test.ts`. See §12 |
 | 32 | Vercel deployment | ⬜ | |
+| — | **Core rules coda** | ✅ | The five closing rules now render, between scenes 32 and 33. See §14 |
+| — | **Scene 27 relayout** | ✅ | Own renderer, two columns — the one-column stack overflowed the screen |
+| — | **Rehearsal instrumentation** | ✅ | Per-world fps recorded automatically under `?perf=1`. See §13 |
 
-**🔒 is now mostly lifted** — the deck has arrived and all Arabic copy is in
-place. Tasks 13–24 are unblocked and are now about **3D environments and
-interaction mechanics**, not content. Two exceptions: Task 15 still needs the
-per-tool detail for `tools.ts`, and Task 23 (Entrepreneurship) has no source
-content at all.
+**Nothing is blocked.** Every 🔒 lifted when the deck arrived, and the last
+three gaps closed with `content-3.json`.
 
 ---
 
-## 4. TIME ESTIMATE
+## 4. WHAT IS LEFT
 
-Twelve tasks were completed in this session. Roughly **20 remain**.
+Three items, and two of them need the room rather than the keyboard.
 
-| Phase | Tasks | Rough effort |
+| # | Task | What it needs |
 |---|---|---|
-| Worlds 3–5 + their 6 interactions | 13–24 | ~1.5–2× the work done so far — these are the biggest tasks; each world is 5–11 scenes plus a bespoke 3D environment |
-| Presenter mode, perf, a11y | 25–28 | Small-to-medium; foundations already exist. Audio dropped |
-| Rehearsal, polish, build, deploy | 29–32 | Small, but rehearsal usually surfaces rework |
+| 29 | **Full rehearsal** | 45 minutes, presented out loud. See `REHEARSAL.md` — five checkpoint times and an FPS reading per world |
+| 30 | Final polish | Nothing to act on until the rehearsal says what to polish. Four `pacing` calls are pre-decided and waiting on it — see ▶ RESUME HERE |
+| 32 | Vercel deployment | An account. The build is verified offline and deploys unchanged |
 
-**The honest answer: the engineering is roughly 60% done, but the schedule
-depends almost entirely on content.** Every remaining world task can be built to
+Task 27 (performance) is done on the engineering side — the per-frame fixes
+landed and the lazy-loading lever measured at 1.2 kB. What is missing is real
+frame-rate numbers, which the rehearsal produces.
+
+Deferred deliberately, each its own session: **type-aware ESLint** (unknown
+finding count) and **component/DOM tests** (would change the sub-2-second
+suite). Neither blocks anything.
+
+<details>
+<summary>Superseded estimate from when the deck had not arrived</summary>
+
+Every remaining world task can be built to
 the same standard as Worlds 1–2 without the deck — they will just ship with
 visible gaps that still need filling afterwards. Supplying the deck earlier
 removes a whole second pass.
@@ -150,6 +199,8 @@ removes a whole second pass.
 If you have a fixed presentation date, tell me and I'll propose a cut-down scope
 (for example: finish all five worlds structurally, skip Task 30 polish,
 and prioritise rehearsal).
+
+</details>
 
 ---
 
@@ -160,10 +211,10 @@ src/
 ├─ app/App.tsx              PresentationStage (default) + DevHarness (press D)
 ├─ components/
 │  ├─ presentation/         engine: provider, navigation, chrome, transitions
-│  ├─ ui/                   9 reusable components + gallery
+│  ├─ ui/                   reusable primitives + gallery
 │  ├─ three/                canvas, camera, lighting, particles, NOVA
-│  │  └─ worlds/            OpeningWorld, AiHistoryWorld, AiMindWorld
-│  └─ interactions/         Poll, MindReader, registry
+│  │  └─ worlds/            all 11 environments
+│  └─ interactions/         all 9, four sharing ChoiceReveal
 ├─ scenes/
 │  ├─ SceneRenderer.tsx     resolves scene → component
 │  ├─ sceneComponents.ts    sparse overrides, else type default
@@ -255,24 +306,24 @@ records *why*, so the reversal is informed.
 
 ---
 
-## 7. CONTENT — the deck is merged
+## 7. CONTENT — complete
 
-The source deck is saved at **`content.json`** in the project root. It is the
-source of truth; where it and earlier code disagreed, the deck won.
+**85 gaps → 0.** Three sources, all in the project root, all the author's:
 
-**Gaps fell from 85 to 5.** All five are things the deck genuinely does not
-contain — not things left undone:
+| File | What it supplied |
+|---|---|
+| **`content.json`** | The deck itself — all 33 scenes. Source of truth; where it and earlier code disagreed, the deck won |
+| **`content-2.json`** | The 13 Arabic column headings and speaker notes for 30 scenes, neither of which the deck contained |
+| **`content-3.json`** | The Real-or-Fake pair and its tells, the Tool Explorer's 5 suggestions, the Study Companion's 5 example prompts, 11 tools, and the closing entrepreneurship line |
 
-| Gap | Where | What is needed |
-|---|---|---|
-| Real-or-Fake pair | `interactions.ts` | Two items to compare — the deck names the threats (Phishing · Fake accounts · AI-generated scams · Deepfakes · Impersonation) but supplies no pair |
-| Tool Explorer suggestions | `interactions.ts` | Which tools suit each of the 5 tasks |
-| Study Companion prompts | `interactions.ts` | What to type to get each of the 5 roles |
-| Entrepreneurship | `scenes.ts` scene 33 | The deck contains none — **Task 23 has no source content**; decide whether to drop it |
-| The tool list | `tools.ts` | Still empty. The deck names tools (ChatGPT, Claude, Gemini, Canva AI, Gamma, GitHub Copilot) but not the per-tool `useCasesAr`/`strengthsAr`/`limitationsAr` the type wants. **Task 15 remains partly blocked** |
+`content.test.ts` now asserts `todoCount === 0` — an equality, not a ceiling, so
+a new marker is a regression rather than known debt. Speaker-note coverage is
+likewise pinned at 33 of 33.
 
-`content.test.ts` now asserts the count stays **≤ 8**, and separately that
-Worlds 1–2 contain no gap at all.
+`deckFidelity.test.ts` diffs the data against those sources **both ways**:
+nothing on screen the author did not write, nothing written that reaches no
+screen. Two exceptions remain, each with a written reason — `مين الحقيقي؟` and
+`Context → Goal → Constraints → Output`, both predating `content.json`.
 
 ### Also worth your eyes
 
@@ -337,6 +388,7 @@ Nine files in `src/__tests__/`, all pure logic — no DOM, no components:
 | `nova.test.ts` | 12 expressions, distinctness, reduced motion |
 | `content.test.ts` | deck structure, timing, interaction cross-refs, gap tracking |
 | `worlds.test.ts` | poll weights, mind formation, Worlds 1–2 shape, local-coordinate guard |
+| `sceneCoverage.test.ts` | **every field of Arabic a scene carries is read by the component that renders it** |
 | `presenterPacing.test.ts` | clock formatting, deck budget, drift, boundary continuity |
 | `direction.test.ts` | RTL/LTR resolution for every deck string |
 | `deckFidelity.test.ts` | **two-way diff against `content.json`** — nothing invented, nothing dropped |
@@ -361,32 +413,37 @@ more worlds are real.
 
 ## 10. RECOMMENDED NEXT STEPS
 
-1. ✅ **Walk the deck in presentation mode** — done, and it immediately found the
-   World 2 black-backdrop bug (§2b). This is why walking it first was worth it.
-2. ✅ **The deck arrived and is merged** (§7).
-3. **Walk it again — the content is real now, and the pacing has changed.**
-   118 beats instead of 59. This is the moment for the timed rehearsal
-   (Task 29): the deck finally says what it is meant to say, so pacing measured
-   now is pacing you can trust.
-4. **Task 25 (presenter mode) is planned and ready to implement** — see the
-   plan file appendix. The timer and pacing badge are what make the rehearsal
-   in step 3 measurable.
-5. Then the worlds, now unblocked and purely about 3D and mechanics:
-   Task 13 (Prompt Lab) → 14 → 17 → 20.
+See **▶ RESUME HERE** at the top. In short: run the rehearsal, then polish what
+it exposes, then deploy.
 
-### Small decisions waiting on you
-- Where `coreRules.ts` should surface — finale recap, presenter reference, or
-  a handout. The deck attaches them to no scene.
-- Whether Task 23 (Entrepreneurship) is dropped, given the deck has no content
-  for it.
-- Whether the ten English comparison headings should become Arabic.
+### No decisions are open
+
+The last one — where the five core rules belong — was settled on 2026-08-18 as
+a coda past the end of the deck. See §14.
+
+### Decisions already made, for the record
+
+| | |
+|---|---|
+| Audio | **Dropped.** The presentation is silent — recorded in `CLAUDE.md` |
+| The five core rules | **A recap between scenes 32 and 33**, not a handout. See §14 |
+| Task 23 Entrepreneurship | **Kept**, one line supplied in `content-3.json` |
+| The 13 English column headings | **Replaced with Arabic** from `content-2.json` |
+| Lazy-loading the 11 worlds | **Measured and rejected** — 1.2 kB gzipped, see §4 |
+| Auto-pacing lists | **Adopted**, except scenes 4, 9, 17 and 33 where each line is presenter-driven by design |
 
 ### Risks worth tracking
-- **The deck is the critical path.** Everything structural can be built without
-  it, but each world then needs a second content pass.
-- **Perf is unmeasured under real load** — three worlds are real, eight are
-  still cheap placeholders. Three known waste paths were fixed (see below), but
-  the numbers in §9 predate them and predate the deck.
+- **Perf is unmeasured under real load.** Three waste paths were fixed (below),
+  but the numbers in §9 predate the deck, the interactions and eight of the
+  eleven environments. **They are no longer meaningful** — the rehearsal
+  replaces them.
+- **`prefers-reduced-motion` is enforced but never seen.** Every path is
+  guarded by tests; nobody has watched the deck with the setting on.
+- **The coda has never been seen in a room**, and it costs unbudgeted time.
+  Judge it on the rehearsal; it is trivial to remove.
+- **Scene 27 was rebuilt on 2026-08-18** because its content overflowed the
+  screen. Its new two-column layout has been typechecked and guarded but not
+  watched.
 
 ### Measured and rejected: lazy-loading the worlds
 
@@ -431,17 +488,35 @@ measurement. Left as-is pending your call, since it is your rules file.
 
 ## 12. RUNNING IT ON THE DAY (Task 31)
 
-Verified 2026-08-17 against a real production build.
+Verified 2026-08-17, and again on 2026-08-18 against the standalone server.
 
 ```bash
-npm run build      # 1.6 MB total in dist/
-npm run preview    # http://localhost:4173
+npm run present    # build, then serve on http://127.0.0.1:4173
 ```
 
 **You must serve it — do not double-click `index.html`.** The app is an ES
 module, and browsers block module scripts loaded over `file://` regardless of
-how the paths are written. `npm run preview` is the supported way, and it needs
-no network.
+how the paths are written.
+
+### Two ways to serve it, and why there are two
+
+| | |
+|---|---|
+| `npm run preview` | Vite's own server. Fine at a desk. Needs `node_modules` intact |
+| **`node serve.mjs`** | **~110 lines using only Node builtins.** Needs `dist/` and Node — nothing else |
+
+`serve.mjs` exists for the failure mode that actually ends a lesson: the deck
+copied to another laptop or a USB stick, `node_modules` missing or broken, and
+no network to `npm install` from. It binds to loopback, sets `Cache-Control:
+no-store` so a cached build can never be shown by mistake, falls back to the
+deck on any unknown path, and refuses to start with a clear message if no build
+is present rather than serving an empty page.
+
+`offline.test.ts` asserts every one of its imports is a `node:` builtin, so the
+zero-dependency promise cannot quietly lapse.
+
+**The portable kit is `dist/` + `serve.mjs`.** Copy those two onto a stick and
+any machine with Node runs the presentation offline.
 
 ### What was checked
 
@@ -508,3 +583,132 @@ mid-lesson would be a disaster.
 **Deferred, not forgotten:** pause/resume (a paused-and-forgotten timer lies
 silently for the rest of the lesson; reset covers rehearsal) and auto-hiding the
 panel on statement/cinematic scenes, whose whole design is a clean screen.
+
+---
+
+## 13. REHEARSAL INSTRUMENTATION
+
+**The run records its own frame rate, per world.** Added 2026-08-18, because
+asking a presenter to read a corner readout and write the number down at each
+world boundary — while presenting out loud for 45 minutes — is how a rehearsal
+comes back with no usable numbers.
+
+`src/lib/perfSession.ts` accumulates one sample a second into a module-scope
+`Map`, keyed by world. Module scope for the same reason as
+`presenterSession.ts`: 2700 `setState` calls over the lesson would reconcile
+`ExperienceCanvas` and the whole 3D tree with it. Only the summary *view*
+renders, and only when the presenter opens it.
+
+| | |
+|---|---|
+| Where | The corner readout is now a button; click it for the table |
+| When | `?perf=1` or a DEV build only — it does not exist in a real lesson |
+| Records | avg / min / max fps, worst single frame in ms, peak draw calls, sample count |
+| Order | Worlds in the order they were first entered, so it reads as the walk |
+| Out | `copy` puts the table on the clipboard with tier, dpr and resolution |
+
+**`min` is the number that matters, not `avg`.** A world averaging 58 that drops
+to 24 at one transition has a stutter the mean hides — so `min` below 30 is
+flagged with a `!` as well as colour.
+
+`worstFrameMs` is the max `delta` inside each sampled second, taken from the
+`useFrame` callback that was already running. `perfSession.test.ts` covers the
+accumulation maths, which is the only part that can be wrong silently.
+
+---
+
+## 14. THE CODA — the five core rules (settled 2026-08-18)
+
+The deck lists five rules after its last scene and attaches them to none:
+Verify · Protect Privacy · Keep Critical Thinking · Don't Let AI Replace Real
+People · Learn to Work With AI. They sat in `src/data/coreRules.ts` rendering
+nowhere. **They are now a recap between scenes 32 and 33** — careers → the five
+rules → the closing message.
+
+Built first as a coda *past* scene 33 and moved on the author's call the same
+day. Placing it after meant the lesson ended on a summary of its closing line
+rather than on the line itself; a recap belongs before the last word.
+
+⚠️ **It has no time budget.** The 33 scenes total exactly 2700s, so the ~45–60
+seconds spent on the rules is unbudgeted and the pacing badge will read about a
+minute behind at the finale. Deliberate — inside the 90-second tolerance in
+`REHEARSAL.md` §3 — and revisited if the rehearsal says the rules take longer.
+
+### Why not a 34th scene
+
+The 33 scenes total exactly 2700s and `content.test.ts` asserts it, so there is
+no room. Making one would have meant taking a minute from somewhere else.
+
+Instead the coda lives in `PresentationState.coda: number | null` — `null` while
+the deck runs, `0` at rest, `1..5` revealing one rule per press. **`sceneIndex`
+never leaves the careers scene.** The consequences are all good ones:
+
+- `SCENES.length` is still 33 and `getTotalBeats()` is still 106, so the
+  progress bar, presenter pacing, the 45-minute budget and `deckFidelity` all
+  see an unchanged deck
+- `ExperienceCanvas` needed **no change at all** — `FutureCityWorld` keeps
+  rendering behind it, so the world holds while the rules land on top of it
+- Removing the coda later is deleting a component and a branch, not unpicking a
+  scene
+
+### Navigation rules worth not undoing
+
+| | |
+|---|---|
+| `→` at scene 32's last beat | opens the coda |
+| `→` past the fifth rule | hands over to scene 33 |
+| `←` from scene 33 at rest | returns to the coda **fully revealed** |
+| `←` from the coda's first position | returns to scene 32 fully revealed |
+| `End` | goes to the closing message **with the coda closed** |
+| `Home` / scene jump | close it and leave |
+| `↓` from inside it | skips the rest of the rules to the closing message |
+
+**`End` goes to the ending, never to the recap in front of it.**
+
+### Measured perf, first pass (2026-08-18)
+
+Real numbers at `medium` / dpr 1.5 / 1536×864, from a partial walk:
+
+| World | avg | worst genuine frame | draw calls |
+|---|---|---|---|
+| ai-lab | 59.9 | 44 ms | 6 |
+| study-lab | 59.9 | 113 ms | 30 |
+| privacy | 59.8 | 113 ms | 38 |
+| ai-world | 58.0 | — | 16 |
+| future | 59.6 | — | 18 |
+
+Comfortable everywhere. The two 113ms hitches in Study Lab and Privacy are the
+only real finding and are single events, not a pattern.
+
+That run also produced a "198-second worst frame" and 0 fps in two worlds, which
+was a defect in the instrument, not the deck: requestAnimationFrame pauses when
+the tab is hidden and reports the whole absence as one frame. Frames longer than
+`MAX_PLAUSIBLE_FRAME_SEC` are now discarded — see `perfSession.ts` for why that
+threshold is the right trade.
+
+### Legibility pass on the finale (2026-08-18)
+
+From the author, watching scene 33: the three closing lines sat too quietly and
+the screen read as flat black.
+
+| | |
+|---|---|
+| Closing lines | `RevealText` gained a `scale="cinematic"` variant — `normal` goes `text-lead`/soft → `text-title`/text, `strong` goes `text-title` → `text-headline`. The gap between them is kept, so `AI أداة.` is still the largest line in the deck. Used only by the two cinematic scenes |
+| Background | `--color-void` lifted `#05060f` → `#0c1022` and `--color-deep` with it, deck-wide so no transition shows a jump. Contrast against `--color-soft` is still ~12:1. `scene-scrim` retinted to match, with its alphas raised slightly so it still does the job it was added for |
+| Arabic leading | `--text-display` 1.25 → 1.35 and `--text-title` 1.4 → 1.5. Arabic sets deeper than Latin — descenders and the shadda in `يفكّر` — and a two-line headline collided at 1.25 |
+
+**`sceneCoverage.test.ts` is new and is the important part.** It resolves the
+component that renders each of the 33 scenes and asserts its source reads every
+content field that scene populates. Verified non-vacuous against the repo's own
+history: the committed `InteractiveScene` mentions `steps` zero times, so this
+test would have caught scene 27's five dead presses.
+
+### Guards
+
+`presentationReducer.test.ts` pins all of the above, including the two
+load-bearing facts — 33 scenes, 106 beats — that prove the coda stayed outside
+the deck. `deckFidelity.test.ts` additionally asserts that `Coda.tsx` and
+`PresenterOverlay.tsx` *read* `CORE_RULES` rather than restating it: the coda is
+the first screen whose copy comes from a component rather than a scene, and a
+rule typed into the JSX would sail straight past the two-way diff — which is
+precisely the class of defect that has already shipped twice here.

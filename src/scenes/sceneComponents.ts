@@ -5,6 +5,7 @@ import { InteractiveScene } from '@/scenes/defaults/InteractiveScene'
 import { StatementScene } from '@/scenes/defaults/StatementScene'
 import { HistoryScene } from '@/scenes/ai-world/HistoryScene'
 import { HowAiWorksScene } from '@/scenes/ai-lab/HowAiWorksScene'
+import { CyberScene } from '@/scenes/privacy/CyberScene'
 import type { SceneDef, SceneType } from '@/types'
 
 export interface SceneComponentProps {
@@ -36,6 +37,8 @@ export const SCENE_COMPONENTS: Partial<Record<string, SceneComponent>> = {
   'ai-is-not-new': HistoryScene,
   // Five pipeline stages advancing in step with the 3D lattice.
   'how-ai-works': HowAiWorksScene,
+  // A list, a two-option quiz and its tells — one column ran off the screen.
+  'ai-cybersecurity': CyberScene,
 }
 
 export function getSceneComponent(scene: SceneDef): SceneComponent {

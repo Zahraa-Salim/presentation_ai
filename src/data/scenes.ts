@@ -1,13 +1,13 @@
 import type { SceneDef, SceneType } from '@/types'
-import { TODO } from '@/lib/todo'
 
 /**
  * The 33 presentation moments, in running order.
  *
  * SOURCE OF TRUTH: `content.json` in the project root. Every title and line
- * below is the deck's, verbatim. The handful of remaining TODOs are things the
- * deck genuinely does not contain — see PROJECT-STATUS.md §7. Nothing here is
- * invented.
+ * below is the deck's, verbatim. The few slots the deck did not contain —
+ * column headings, speaker notes, the closing entrepreneurship line — were
+ * authored separately in `content-2.json` and `content-3.json`. Nothing here
+ * is invented; `deckFidelity.test.ts` proves it both ways.
  *
  * ORDERING: Parts 01–09 are kept in their original order. Worlds are
  * assigned so each one is contiguous (no bouncing between environments),
@@ -94,6 +94,8 @@ export const SCENES: readonly SceneDef[] = [
     type: 'explain',
     content: {
       headline: 'AI مش جديد.',
+      // Stepped: each orb in the 3D timeline lights as its milestone appears.
+      pacing: 'stepped',
       // Ids and text must match AI_HISTORY in src/data/aiHistory.ts — the
       // milestone and the beat that reveals it are joined by these, the same
       // way scene 9 is joined to AI_PIPELINE. A test asserts they agree.
@@ -243,6 +245,8 @@ export const SCENES: readonly SceneDef[] = [
     type: 'explain',
     content: {
       headline: 'كيف بيشتغل AI؟',
+      // Stepped: the lattice node for each stage lights with its line.
+      pacing: 'stepped',
       // Stage ids must match AI_PIPELINE in src/data/aiPipeline.ts — the DOM
       // label and the 3D node that lights up are joined by these.
       steps: [
@@ -490,6 +494,8 @@ export const SCENES: readonly SceneDef[] = [
     type: 'explain',
     content: {
       headline: 'Prompt أقوى.',
+      // Stepped: the AI Machine's beam focuses as each part is named.
+      pacing: 'stepped',
       example:
         'أنا طالب صف 11. اشرحلي Photosynthesis بالعربي البسيط. أعطيني مثال من الحياة اليومية. وبعدين اختبرني بـ5 أسئلة.',
       steps: [
@@ -988,6 +994,9 @@ export const SCENES: readonly SceneDef[] = [
     title: 'خلي AI يساعدك، مش يفكّر بدالك.',
     type: 'cinematic',
     content: {
+      // Stepped, and this is the one that matters most: the pause between
+      // these four lines is the ending. Cascading them would flatten it.
+      pacing: 'stepped',
       // The closing sequence, specified verbatim in the brief.
       steps: [
         { id: 'not-magic', text: 'AI مش سحر.', emphasis: 'normal' },
@@ -996,9 +1005,9 @@ export const SCENES: readonly SceneDef[] = [
         { id: 'is-a-tool', text: 'AI أداة.', emphasis: 'strong' },
       ],
       statement: 'خلي AI يساعدك، مش يفكّر بدالك.',
-      // The deck contains no entrepreneurship content, so this slot stays open
-      // rather than being filled with invented copy. See PROJECT-STATUS.md §7.
-      note: TODO('محتوى ريادة الأعمال (Entrepreneurship) قبل الرسالة الأخيرة'),
+      // The entrepreneurship line, authored separately when the deck turned out
+      // not to contain one. Source: content-3.json.
+      note: 'فكرة صغيرة + AI ممكن تصير أول Prototype أو خدمة بسيطة تجرّبها مع ناس حقيقيين بدل ما تضل مجرد فكرة.',
     },
     scene3d: 'finale',
     durationSec: 70,

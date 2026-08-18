@@ -1,7 +1,6 @@
 import { motion } from 'motion/react'
 import { RevealText } from '@/components/ui'
 import { usePresentation } from '@/hooks/usePresentation'
-import { getBeatLayout } from '@/lib/beats'
 import { getStatementPhase } from '@/lib/transitions'
 import type { SceneDef } from '@/types'
 
@@ -18,7 +17,6 @@ import type { SceneDef } from '@/types'
  */
 export function StatementScene({ scene }: { scene: SceneDef }) {
   const { beat } = usePresentation()
-  const layout = getBeatLayout(scene)
   const phase = getStatementPhase(scene, beat)
   const revealed = phase === 'revealed'
 
@@ -31,7 +29,7 @@ export function StatementScene({ scene }: { scene: SceneDef }) {
           {steps.map((step, index) => (
             <RevealText
               key={step.id}
-              step={layout.stepsStart + index}
+              stepIndex={index}
               emphasis={step.emphasis}
             >
               {step.text}

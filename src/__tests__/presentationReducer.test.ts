@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { CORE_RULES } from '@/data/coreRules'
 import { SCENES } from '@/data/scenes'
 import { getSceneBeatCount, getTotalBeats } from '@/lib/beats'
 import {
@@ -9,15 +10,16 @@ import { readSceneFromHash } from '@/lib/hash'
 import type { PresentationState } from '@/types'
 
 const beats = SCENES.map(getSceneBeatCount)
-const key = (s: PresentationState) => `${s.sceneIndex}:${s.beat}`
+const key = (s: PresentationState) =>
+  s.coda === null ? `${s.sceneIndex}:${s.beat}` : `coda:${s.coda}`
 const LAST = SCENES.length - 1
 
 describe('beat counts', () => {
   /* Pinned so an accidental change is visible. It moves legitimately as the
      deck is transcribed — each list the deck supplies becomes a reveal step —
      so update it deliberately, never to make a red test go green. */
-  it('totals 146 beats across the deck', () => {
-    expect(getTotalBeats()).toBe(146)
+  it('totals 106 beats across the deck', () => {
+    expect(getTotalBeats()).toBe(106)
   })
 
   it('gives the finale 6 beats — 4 steps plus its statement', () => {
@@ -63,6 +65,13 @@ describe('beat counts', () => {
 })
 
 describe('walking the deck', () => {
+  /**
+   * Walks the whole deck, *through* the coda but without counting it.
+   *
+   * The coda sits between scenes 32 and 33 and is not a beat. Counting its
+   * presses would make `getTotalBeats()` quietly stop meaning what it says;
+   * stopping at it would leave scene 33 unwalked.
+   */
   const walk = (from: PresentationState, action: 'NEXT' | 'PREV') => {
     const visited = [key(from)]
     let state = from
@@ -70,7 +79,7 @@ describe('walking the deck', () => {
       const next = reduce(state, { type: action })
       if (next === state) break
       state = next
-      visited.push(key(state))
+      if (state.coda === null) visited.push(key(state))
     }
     return { state, visited }
   }
@@ -99,10 +108,24 @@ describe('walking the deck', () => {
   })
 })
 
+const deckEnd: PresentationState = {
+  sceneIndex: LAST,
+  beat: beats[LAST] - 1,
+  direction: 1,
+  coda: null,
+}
+
+/** The last beat of scene 32 — the one place the coda opens from. */
+const beforeCoda: PresentationState = {
+  sceneIndex: LAST - 1,
+  beat: beats[LAST - 1] - 1,
+  direction: 1,
+  coda: null,
+}
+
 describe('bounds — the deck never wraps', () => {
   it('ignores NEXT at the very end', () => {
-    const end = { sceneIndex: LAST, beat: beats[LAST] - 1, direction: 1 as const }
-    expect(reduce(end, { type: 'NEXT' })).toBe(end)
+    expect(reduce(deckEnd, { type: 'NEXT' })).toBe(deckEnd)
   })
 
   it('ignores PREV at the very start', () => {
@@ -163,6 +186,129 @@ describe('jump, first and last', () => {
   it('sends FIRST to the start and LAST to the fully-revealed end', () => {
     expect(key(reduce(base, { type: 'FIRST' }))).toBe('0:0')
     expect(key(reduce(base, { type: 'LAST' }))).toBe(`${LAST}:${beats[LAST] - 1}`)
+  })
+})
+
+describe('the coda — five core rules before the closing message', () => {
+  const openCoda = (step: number): PresentationState => ({
+    ...beforeCoda,
+    coda: step,
+  })
+
+  it('opens on pressing past the careers scene, not past the deck', () => {
+    expect(reduce(beforeCoda, { type: 'NEXT' }).coda).toBe(0)
+    expect(reduce(deckEnd, { type: 'NEXT' }).coda).toBeNull()
+  })
+
+  it('does not open one beat early', () => {
+    const oneShort: PresentationState = {
+      ...beforeCoda,
+      beat: beats[LAST - 1] - 2,
+    }
+    const next = reduce(oneShort, { type: 'NEXT' })
+    expect(next.coda).toBeNull()
+    expect(next.beat).toBe(beats[LAST - 1] - 1)
+  })
+
+  it('reveals one rule per press', () => {
+    let state = reduce(beforeCoda, { type: 'NEXT' })
+    for (let i = 1; i <= CORE_RULES.length; i++) {
+      state = reduce(state, { type: 'NEXT' })
+      expect(state.coda).toBe(i)
+    }
+  })
+
+  /* The whole reason it moved here: the lesson must end on
+     `خلي AI يساعدك، مش يفكّر بدالك.`, not on a summary of it. */
+  it('hands over to the closing message after the fifth rule', () => {
+    const state = reduce(openCoda(CORE_RULES.length), { type: 'NEXT' })
+    expect(state.coda).toBeNull()
+    expect(key(state)).toBe(`${LAST}:0`)
+  })
+
+  it('never moves the scene while it is open', () => {
+    let state = reduce(beforeCoda, { type: 'NEXT' })
+    for (let i = 0; i < CORE_RULES.length; i++) {
+      state = reduce(state, { type: 'NEXT' })
+      expect(state.sceneIndex).toBe(LAST - 1)
+      expect(state.beat).toBe(beats[LAST - 1] - 1)
+    }
+  })
+
+  it('walks back out to the careers scene fully revealed', () => {
+    let state: PresentationState = openCoda(CORE_RULES.length)
+    for (let i = 0; i < CORE_RULES.length + 1; i++) {
+      state = reduce(state, { type: 'PREV' })
+    }
+    expect(state.coda).toBeNull()
+    expect(key(state)).toBe(`${LAST - 1}:${beats[LAST - 1] - 1}`)
+  })
+
+  it('backing out of the closing message returns to the coda fully revealed', () => {
+    const state = reduce(
+      { sceneIndex: LAST, beat: 0, direction: 1, coda: null },
+      { type: 'PREV' },
+    )
+    expect(state.coda).toBe(CORE_RULES.length)
+  })
+
+  it('is symmetric — forward then back returns every state in reverse', () => {
+    const forward: string[] = [key(beforeCoda)]
+    let state: PresentationState = beforeCoda
+    for (let i = 0; i <= CORE_RULES.length + 1; i++) {
+      state = reduce(state, { type: 'NEXT' })
+      forward.push(key(state))
+    }
+
+    const backward: string[] = [key(state)]
+    for (let i = 0; i <= CORE_RULES.length + 1; i++) {
+      state = reduce(state, { type: 'PREV' })
+      backward.push(key(state))
+    }
+
+    expect(backward.reverse()).toEqual(forward)
+  })
+
+  /* End goes to the ending, never to the recap in front of it. */
+  it('LAST lands on the closing message with the coda closed', () => {
+    const state = reduce(openCoda(3), { type: 'LAST' })
+    expect(state.coda).toBeNull()
+    expect(key(state)).toBe(`${LAST}:${beats[LAST] - 1}`)
+  })
+
+  it.each([
+    ['FIRST', { type: 'FIRST' } as const, 0],
+    ['JUMP_TO_SCENE', { type: 'JUMP_TO_SCENE', sceneIndex: 11 } as const, 11],
+  ])('%s closes the coda and leaves the deck', (_label, action, expected) => {
+    const state = reduce(openCoda(2), action)
+    expect(state.coda).toBeNull()
+    expect(state.sceneIndex).toBe(expected)
+    expect(state.beat).toBe(0)
+  })
+
+  it('NEXT_SCENE skips the rest of the rules and lands on the closing message', () => {
+    const state = reduce(openCoda(1), { type: 'NEXT_SCENE' })
+    expect(state.coda).toBeNull()
+    expect(key(state)).toBe(`${LAST}:0`)
+  })
+
+  it('PREV_SCENE leaves it for the careers scene at rest', () => {
+    const state = reduce(openCoda(4), { type: 'PREV_SCENE' })
+    expect(state.coda).toBeNull()
+    expect(key(state)).toBe(`${LAST - 1}:0`)
+  })
+
+  /* The load-bearing guarantee of the whole design: the coda is not a scene.
+     If either of these moves, the 45-minute budget and the progress bar have
+     silently changed meaning. */
+  it('leaves the deck at 33 scenes and 106 beats', () => {
+    expect(SCENES).toHaveLength(33)
+    expect(getTotalBeats()).toBe(106)
+  })
+
+  it('starts closed', () => {
+    expect(initialPresentationState(0).coda).toBeNull()
+    expect(initialPresentationState(LAST).coda).toBeNull()
   })
 })
 

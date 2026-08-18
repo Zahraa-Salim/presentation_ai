@@ -27,6 +27,32 @@ export function getTotalBeats(): number {
   return SCENES.reduce((sum, scene) => sum + getSceneBeatCount(scene), 0)
 }
 
+export interface RevealTiming {
+  revealed: boolean
+  /** Stagger, so auto-paced items arrive in sequence rather than together. */
+  delaySec: number
+}
+
+/**
+ * Whether content step `index` is showing yet, and how long it waits.
+ *
+ * Steps are addressed by their index, not by a beat number. Once auto-paced
+ * steps stopped consuming beats, `stepsStart + index` began colliding with
+ * whatever comes next — on a three-step scene, step 0 and the keyMessage were
+ * both "beat 1", so the takeaway appeared at rest alongside the list it was
+ * supposed to conclude.
+ */
+export function getStepTiming(
+  scene: SceneDef,
+  beat: number,
+  index: number,
+): RevealTiming {
+  if (!areStepsStepped(scene)) {
+    return { revealed: true, delaySec: index * STEP_STAGGER_SEC }
+  }
+  return { revealed: beat >= getBeatLayout(scene).stepsStart + index, delaySec: 0 }
+}
+
 /**
  * Which beat owns which content.
  *
@@ -65,8 +91,17 @@ export interface BeatLayout {
   total: number
 }
 
+/** Seconds between one auto-paced step appearing and the next. */
+export const STEP_STAGGER_SEC = 0.15
+
+/** Whether this scene's steps each cost a key press. */
+export function areStepsStepped(scene: SceneDef): boolean {
+  return (scene.content.pacing ?? 'auto') === 'stepped'
+}
+
 export function getBeatLayout(scene: SceneDef): BeatLayout {
   const stepCount = scene.content.steps?.length ?? 0
+  const stepBeats = areStepsStepped(scene) ? stepCount : 0
   const groupCount = scene.content.groups?.length ?? 0
   const interaction = scene.interaction
     ? INTERACTION_BY_ID[scene.interaction]
@@ -74,7 +109,7 @@ export function getBeatLayout(scene: SceneDef): BeatLayout {
   const interactionBeats = interaction ? getInteractionBeats(interaction) : 0
 
   const stepsStart = 1
-  let nextBeat = stepsStart + stepCount
+  let nextBeat = stepsStart + stepBeats
 
   // A comparison lands column by column — showing "weak" and "strong" at once
   // gives the class nothing to think about in between.

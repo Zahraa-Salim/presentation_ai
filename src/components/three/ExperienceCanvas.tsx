@@ -100,7 +100,13 @@ export function ExperienceCanvas({ demoEmotion }: ExperienceCanvasProps = {}) {
               ]}
             />
           )}
-          {showPerf && <PerfMeter quality={quality} onSample={setSample} />}
+          {showPerf && (
+            <PerfMeter
+              quality={quality}
+              worldId={world.id}
+              onSample={setSample}
+            />
+          )}
         </Canvas>
       </div>
 

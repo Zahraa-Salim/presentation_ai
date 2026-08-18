@@ -86,6 +86,41 @@ describe('every asset is bundled', () => {
   })
 })
 
+/**
+ * `serve.mjs` exists so the deck can be presented from `dist/` plus Node and
+ * nothing else — no `node_modules`, no `npm install`, no network. The moment it
+ * imports a package that promise is gone, and the failure surfaces on a school
+ * laptop ten minutes before a class rather than here.
+ */
+describe('the standalone server stays standalone', () => {
+  const server = readFileSync(
+    fileURLToPath(new URL('../../serve.mjs', import.meta.url)),
+    'utf8',
+  )
+
+  const imports = [...server.matchAll(/from\s+'([^']+)'/g)].map((m) => m[1])
+
+  it('imports something, so this is not passing vacuously', () => {
+    expect(imports.length).toBeGreaterThan(0)
+  })
+
+  it.each(
+    [...new Set(imports)].map((specifier) => [specifier] as const),
+  )('imports %s, which is a Node builtin', (specifier) => {
+    expect(specifier.startsWith('node:')).toBe(true)
+  })
+
+  it('binds to loopback rather than every interface', () => {
+    // A classroom network is not somewhere to expose a server by accident.
+    expect(server).toContain("'127.0.0.1'")
+  })
+
+  it('refuses to serve a build that is not there', () => {
+    // Silently serving nothing would look like a broken app, not a missing build.
+    expect(server).toContain('npm run build')
+  })
+})
+
 describe('no third-party endpoint is referenced', () => {
   /* Namespace URIs and repository metadata are inert strings. What must not
      appear is somewhere this app would actually talk to. */

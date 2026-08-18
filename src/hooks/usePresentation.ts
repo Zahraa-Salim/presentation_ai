@@ -23,6 +23,15 @@ export interface PresentationView {
   beatCount: number
   isSceneFullyRevealed: boolean
 
+  /**
+   * The coda between the careers scene and the closing message: `null` while
+   * the deck is running, otherwise how many of the five core rules are
+   * revealed. It is not a scene — `scene`, `world` and `progress` keep
+   * reporting the careers scene underneath it.
+   */
+  coda: number | null
+  isCoda: boolean
+
   isFirstScene: boolean
   isLastScene: boolean
   isFirstBeat: boolean
@@ -67,12 +76,17 @@ export function usePresentation(): PresentationView {
       beatCount,
       isSceneFullyRevealed: isLastBeat,
 
+      coda: state.coda,
+      isCoda: state.coda !== null,
+
       isFirstScene,
       isLastScene,
       isFirstBeat,
       isLastBeat,
-      canGoNext: !(isLastScene && isLastBeat),
-      canGoPrev: !(isFirstScene && isFirstBeat),
+      // Inside the coda there is always somewhere forward: another rule, or
+      // the closing message it hands over to.
+      canGoNext: state.coda !== null || !(isLastScene && isLastBeat),
+      canGoPrev: state.coda !== null || !(isFirstScene && isFirstBeat),
 
       progress: (state.sceneIndex + 1) / totalScenes,
       sceneProgress: beatCount > 1 ? state.beat / (beatCount - 1) : 1,

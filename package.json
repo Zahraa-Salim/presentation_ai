@@ -10,7 +10,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "serve": "node serve.mjs",
+    "present": "npm run build && node serve.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

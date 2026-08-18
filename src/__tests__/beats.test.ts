@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { SCENES } from '@/data/scenes'
 import { INTERACTION_BY_ID } from '@/data/interactions'
-import { getBeatLayout, getSceneBeatCount } from '@/lib/beats'
+import {
+  areStepsStepped,
+  getBeatLayout,
+  getSceneBeatCount,
+  getStepTiming,
+} from '@/lib/beats'
 
 describe('beat layout', () => {
   it('agrees with the beat count for every scene', () => {
@@ -22,8 +27,11 @@ describe('beat layout', () => {
         owners.set(beat, who)
       }
 
-      for (let i = 0; i < layout.stepCount; i++) {
-        claim(layout.stepsStart + i, 'step')
+      // Auto-paced steps cost no beat, so they claim none.
+      if (areStepsStepped(scene)) {
+        for (let i = 0; i < layout.stepCount; i++) {
+          claim(layout.stepsStart + i, 'step')
+        }
       }
       if (layout.groupsStart !== null) {
         for (let i = 0; i < layout.groupCount; i++) {
@@ -102,10 +110,80 @@ describe('beat layout', () => {
       const layout = getBeatLayout(scene)
       if (layout.groupsStart === null) continue
 
-      expect(layout.groupsStart).toBe(layout.stepsStart + layout.stepCount)
+      const stepBeats = areStepsStepped(scene) ? layout.stepCount : 0
+      expect(layout.groupsStart).toBe(layout.stepsStart + stepBeats)
       if (layout.statementBeat !== null) {
         expect(layout.statementBeat).toBe(layout.groupsStart + layout.groupCount)
       }
+    }
+  })
+})
+
+/**
+ * Seven single words should not cost seven presses — but four scenes depend on
+ * the presenter driving each line, and losing that would cost the deck its
+ * ending.
+ */
+describe('step pacing', () => {
+  const STEPPED = ['ai-is-not-new', 'how-ai-works', 'strong-prompt', 'final']
+
+  it('keeps exactly the four scenes that need it presenter-stepped', () => {
+    const stepped = SCENES.filter(areStepsStepped).map((s) => s.id)
+    expect(stepped.sort()).toEqual([...STEPPED].sort())
+  })
+
+  it('costs no beat for an auto-paced list', () => {
+    for (const scene of SCENES) {
+      if (areStepsStepped(scene) || !scene.content.steps?.length) continue
+      const layout = getBeatLayout(scene)
+      // Whatever comes next starts immediately after the scene at rest.
+      const next =
+        layout.groupsStart ?? layout.statementBeat ?? layout.interactionStart
+      if (next !== null && next !== undefined) expect(next, scene.id).toBe(1)
+    }
+  })
+
+  it('shows every auto-paced step at rest, staggered in order', () => {
+    const scene = SCENES.find((s) => s.id === 'ai-is-everywhere')!
+    const layout = getBeatLayout(scene)
+    expect(layout.stepCount).toBe(7)
+
+    let previous = -1
+    for (let i = 0; i < layout.stepCount; i++) {
+      const timing = getStepTiming(scene, 0, i)
+      expect(timing.revealed, `step ${i}`).toBe(true)
+      expect(timing.delaySec, `step ${i}`).toBeGreaterThan(previous)
+      previous = timing.delaySec
+    }
+  })
+
+  it('holds a stepped list until its beat arrives, with no stagger', () => {
+    const finale = SCENES.find((s) => s.id === 'final')!
+    const layout = getBeatLayout(finale)
+
+    for (let i = 0; i < layout.stepCount; i++) {
+      const beat = layout.stepsStart + i
+      expect(getStepTiming(finale, beat - 1, i).revealed, `step ${i}`).toBe(false)
+      expect(getStepTiming(finale, beat, i).revealed, `step ${i}`).toBe(true)
+      expect(getStepTiming(finale, beat, i).delaySec).toBe(0)
+    }
+  })
+
+  /*
+    Steps are addressed by index, never by beat number. Once auto-paced steps
+    stopped consuming beats, `stepsStart + index` collided with whatever came
+    next — on a three-step scene, step 0 and the keyMessage were both "beat 1",
+    so the takeaway appeared at rest alongside the list it concludes.
+  */
+  it('never lets an auto-paced step reach the beat its scene lands on', () => {
+    for (const scene of SCENES) {
+      const layout = getBeatLayout(scene)
+      const landing = layout.keyMessageBeat ?? layout.statementBeat
+      if (landing === null || !scene.content.steps?.length) continue
+      if (areStepsStepped(scene)) continue
+
+      // The landing beat is past rest, so it cannot be showing at beat 0.
+      expect(landing, scene.id).toBeGreaterThan(0)
     }
   })
 })

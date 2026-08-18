@@ -1,7 +1,6 @@
 import { motion } from 'motion/react'
 import { RevealText } from '@/components/ui'
 import { usePresentation } from '@/hooks/usePresentation'
-import { getBeatLayout } from '@/lib/beats'
 import { getStatementPhase } from '@/lib/transitions'
 import type { SceneDef } from '@/types'
 
@@ -14,7 +13,6 @@ import type { SceneDef } from '@/types'
  */
 export function CinematicScene({ scene }: { scene: SceneDef }) {
   const { beat } = usePresentation()
-  const layout = getBeatLayout(scene)
   const phase = getStatementPhase(scene, beat)
   const revealed = phase === null || phase === 'revealed'
 
@@ -40,12 +38,15 @@ export function CinematicScene({ scene }: { scene: SceneDef }) {
       </motion.h1>
 
       {steps && steps.length > 0 && (
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-5">
           {steps.map((step, index) => (
             <RevealText
               key={step.id}
-              step={layout.stepsStart + index}
+              stepIndex={index}
               emphasis={step.emphasis}
+              /* The finale's closing lines are the last thing the class reads
+                 and there is nothing else on screen competing with them. */
+              scale="cinematic"
             >
               {step.text}
             </RevealText>
