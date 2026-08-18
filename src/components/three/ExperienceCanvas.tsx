@@ -13,7 +13,7 @@ import { getScene3DComponent } from '@/components/three/sceneRegistry'
 import { usePresentation } from '@/hooks/usePresentation'
 import { useQualityTier } from '@/hooks/useQualityTier'
 import { getWorldAccent } from '@/lib/worldAccent'
-import { AICharacter } from '@/components/three/AICharacter'
+import { RobotModel } from '@/components/three/RobotModel'
 import { getCameraPose } from '@/lib/cameraPoses'
 import type { NovaEmotion } from '@/types'
 
@@ -31,7 +31,7 @@ import type { NovaEmotion } from '@/types'
 interface ExperienceCanvasProps {
   /**
    * TEMPORARY. Lets the dev harness drive NOVA so all 12 states can be
-   * reviewed. From Phase 5 scenes place <AICharacter> themselves and this goes.
+   * reviewed as the class will see them, without walking to their scenes.
    */
   demoEmotion?: NovaEmotion
 }
@@ -93,18 +93,23 @@ export function ExperienceCanvas({ demoEmotion }: ExperienceCanvasProps = {}) {
             })}
           </group>
 
+          {/* The harness drives the shipping body, so all twelve states can be
+              reviewed as the class will actually see them. */}
           {demoEmotion && (
-            <AICharacter
-              emotion={demoEmotion}
-              quality={quality}
-              accent={accent}
-              // Sits beside the placeholder, at the scene's own anchor point.
+            <group
               position={[
                 getCameraPose(scene.scene3d).target[0] + 2.6,
                 getCameraPose(scene.scene3d).target[1] - 0.4,
                 getCameraPose(scene.scene3d).target[2] + 2,
               ]}
-            />
+              scale={1.6}
+            >
+              <RobotModel
+                emotion={demoEmotion}
+                quality={quality}
+                accent={accent}
+              />
+            </group>
           )}
           {/*
             NOVA rides the corner of the frame for the whole lesson. Anchored to

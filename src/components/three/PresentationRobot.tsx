@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import type { Group, PerspectiveCamera } from 'three'
-import { AICharacter } from '@/components/three/AICharacter'
+import { RobotModel } from '@/components/three/RobotModel'
 import { usePresentation } from '@/hooks/usePresentation'
 import { getRobotBehavior } from '@/lib/robotBehavior'
 import {
@@ -88,20 +88,18 @@ export function PresentationRobot({
   return (
     <group ref={groupRef}>
       {/*
-        Motes are forced off whatever the tier. AICharacter enables a
-        ParticleField on high, which earns its place when NOVA is the subject of
-        a scene; a companion the size of a thumbnail in the corner spends a draw
-        call on something nobody can resolve.
-
         The brightness lift pays back the scrim, which veils the canvas but not
         the DOM text above it — without it the companion reads at 59% of what it
         was designed to.
+
+        AICharacter — NOVA's original abstract form — is kept rather than
+        deleted: it is the fallback if the character body turns out to be too
+        much for a classroom, and swapping back is one line here.
       */}
-      <AICharacter
+      <RobotModel
         emotion={behavior.emotion}
         quality={quality}
         accent={accent}
-        motes={false}
         brightness={SCRIM_COMPENSATION}
       />
     </group>
