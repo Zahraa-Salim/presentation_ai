@@ -61,6 +61,18 @@ export function AICharacter({
   const lensRef = useRef<Mesh>(null)
   const ringARef = useRef<Mesh>(null)
   const ringBRef = useRef<Mesh>(null)
+  /*
+    The rings' tilt lives on the mesh; the spin lives on a parent group.
+
+    They have to be separate. A torus lies in the XY plane with its axis along
+    Z, so turning it about its own Z is turning it about its own axis of
+    symmetry — real in the matrix, invisible on screen. Worse, the default XYZ
+    Euler order applies that Z rotation *first*, so the static tilt cannot
+    rescue it either. Spinning the parent about Y precesses the whole tilted
+    ring instead, which is the orbit the design always described.
+  */
+  const spinARef = useRef<Group>(null)
+  const spinBRef = useRef<Group>(null)
 
   // Current (eased) values, so emotion changes glide rather than pop.
   const current = useRef({ openness: 0.7, tilt: 0, separation: 1, pulse: 0.6 })
@@ -147,14 +159,16 @@ export function AICharacter({
     // The rings throw outward on a burst, which is what makes it read as one.
     const spread = c.separation * (1 + flare * 0.45)
 
-    if (ringARef.current) {
-      ringARef.current.rotation.z += delta * target.ringSpeed
-      ringARef.current.scale.setScalar(spread)
+    if (spinARef.current) {
+      spinARef.current.rotation.y += delta * target.ringSpeed
     }
-    if (ringBRef.current) {
-      ringBRef.current.rotation.z -= delta * target.ringSpeed * 0.75
-      ringBRef.current.scale.setScalar(spread * 1.18)
+    if (ringARef.current) ringARef.current.scale.setScalar(spread)
+
+    if (spinBRef.current) {
+      // Counter-rotating and slower, so the two never lock into one shape.
+      spinBRef.current.rotation.y -= delta * target.ringSpeed * 0.75
     }
+    if (ringBRef.current) ringBRef.current.scale.setScalar(spread * 1.18)
   })
 
   /* Clamped: a multiplier must never push an opacity past 1, which would be
@@ -203,29 +217,33 @@ export function AICharacter({
         <meshBasicMaterial color={hue} transparent opacity={lit(0.85)} />
       </mesh>
 
-      {/* orbit rings */}
-      <mesh ref={ringARef} rotation={[Math.PI / 2.6, 0.3, 0]}>
-        <torusGeometry args={[0.92, 0.018, 8, 64]} />
-        <meshBasicMaterial
-          color={hue}
-          transparent
-          opacity={lit(0.7)}
-          blending={AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-
-      {showSecondRing && (
-        <mesh ref={ringBRef} rotation={[Math.PI / 1.7, -0.5, 0.4]}>
-          <torusGeometry args={[0.92, 0.012, 8, 64]} />
+      {/* orbit rings — tilt on the mesh, spin on the group. See above. */}
+      <group ref={spinARef}>
+        <mesh ref={ringARef} rotation={[Math.PI / 2.6, 0.3, 0]}>
+          <torusGeometry args={[0.92, 0.018, 8, 64]} />
           <meshBasicMaterial
             color={hue}
             transparent
-            opacity={lit(0.45)}
+            opacity={lit(0.7)}
             blending={AdditiveBlending}
             depthWrite={false}
           />
         </mesh>
+      </group>
+
+      {showSecondRing && (
+        <group ref={spinBRef}>
+          <mesh ref={ringBRef} rotation={[Math.PI / 1.7, -0.5, 0.4]}>
+            <torusGeometry args={[0.92, 0.012, 8, 64]} />
+            <meshBasicMaterial
+              color={hue}
+              transparent
+              opacity={lit(0.45)}
+              blending={AdditiveBlending}
+              depthWrite={false}
+            />
+          </mesh>
+        </group>
       )}
 
       {showMotes && (

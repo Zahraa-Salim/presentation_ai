@@ -5,14 +5,22 @@ import { SCENES } from '@/data/scenes'
 import { CAMERA_POSES } from '@/lib/cameraPoses'
 import { ROBOT_BEHAVIORS, getRobotBehavior } from '@/lib/robotBehavior'
 import {
+  DRIFT_X,
+  DRIFT_Y,
+  FLIGHT_ARC,
   HEIGHT_FRACTION,
   INSET_X,
   INSET_Y,
   ROBOT_DISTANCE,
   SCRIM_COMPENSATION,
+  cornerForWorld,
+  cornerSide,
+  getFlightArc,
+  getRobotDrift,
   getRobotPlacement,
   projectRobot,
 } from '@/lib/robotPlacement'
+import { WORLDS } from '@/data/worlds'
 import { NOVA_EMOTIONS } from '@/types'
 
 /**
@@ -248,33 +256,37 @@ describe('placement is invariant to the frame it sits in', () => {
   })
 
   it('mirrors cleanly to the other corner', () => {
-    const right = projectRobot(50, 16 / 9, 'bottom-right')
-    const left = projectRobot(50, 16 / 9, 'bottom-left')
+    const right = projectRobot(50, 16 / 9, { side: cornerSide('bottom-right') })
+    const left = projectRobot(50, 16 / 9, { side: cornerSide('bottom-left') })
     expect(left.ndcX).toBeCloseTo(-right.ndcX, 10)
     expect(left.ndcY).toBeCloseTo(right.ndcY, 10)
   })
 
   it('honours a per-scene scale reduction', () => {
-    const full = projectRobot(50, 16 / 9, 'bottom-right', 1)
-    const small = projectRobot(50, 16 / 9, 'bottom-right', 0.85)
+    const full = projectRobot(50, 16 / 9, { side: 1, scaleMultiplier: 1 })
+    const small = projectRobot(50, 16 / 9, { side: 1, scaleMultiplier: 0.85 })
     expect(small.ndcHeight).toBeCloseTo(full.ndcHeight * 0.85, 10)
   })
 })
 
 describe('it stays inside the frame and off the chrome', () => {
-  it('keeps clear of the bottom edge, where the progress bar lives', () => {
+  const halfModel = 0.92 * HEIGHT_FRACTION
+
+  it('keeps clear of the bottom edge even at the bottom of its drift', () => {
     // The model is about 1.84 local units tall (ring diameter), so it reaches
-    // roughly 0.92 · HEIGHT_FRACTION below its anchor in NDC.
-    const halfModel = 0.92 * HEIGHT_FRACTION
-    const lowest = INSET_Y + halfModel
-    expect(lowest).toBeLessThan(0.94)
+    // roughly 0.92 · HEIGHT_FRACTION below its anchor in NDC. The drift adds to
+    // that; the arc only ever lifts, so it cannot.
+    expect(INSET_Y + DRIFT_Y + halfModel).toBeLessThan(0.96)
   })
 
-  it('keeps clear of the side edge', () => {
-    const halfModel = 0.92 * HEIGHT_FRACTION
-    // Widths are shorter than heights in NDC terms on a wide frame, so the
-    // vertical figure is the conservative one to use here too.
-    expect(INSET_X + halfModel).toBeLessThan(1)
+  it('keeps clear of the side edge even at the outside of its drift', () => {
+    expect(INSET_X + DRIFT_X + halfModel).toBeLessThan(1)
+  })
+
+  it('never lifts far enough to reach the text', () => {
+    // Mid-crossing is the highest it ever gets, and it is passing beneath the
+    // scene's copy at that moment.
+    expect(INSET_Y - FLIGHT_ARC - DRIFT_Y).toBeGreaterThan(0.35)
   })
 
   it('sits below the vertical middle, out of the text block', () => {
@@ -310,7 +322,7 @@ describe('it rides nearer than any world', () => {
 
   it('stays in front of the near plane with room to spare', () => {
     // R3F's default near plane is 0.1.
-    const halfDepth = getRobotPlacement(60, 16 / 9).scale * 0.92
+    const halfDepth = getRobotPlacement(60, 16 / 9, { side: 1 }).scale * 0.92
     expect(ROBOT_DISTANCE - halfDepth).toBeGreaterThan(1)
   })
 })
@@ -364,5 +376,146 @@ describe('the scrim compensation tracks the stylesheet', () => {
     expect(0.14 * SCRIM_COMPENSATION).toBeLessThan(1)
     expect(SCRIM_COMPENSATION).toBeGreaterThan(1)
     expect(SCRIM_COMPENSATION).toBeLessThan(2.5)
+  })
+})
+
+
+describe('it crosses the screen, rarely and on purpose', () => {
+  /*
+    The corner comes from the world rather than the scene, so the companion
+    changes sides exactly four times in 45 minutes — always at the moment the
+    class is being taken somewhere new. Movement in the corner of the eye costs
+    attention: four crossings across a lesson is an event, forty would be a
+    distraction.
+  */
+  const corners = WORLDS.map((world) => cornerForWorld(world.order))
+
+  it('gives every neighbouring world a different corner', () => {
+    for (let i = 1; i < corners.length; i++) {
+      expect(corners[i], WORLDS[i].id).not.toBe(corners[i - 1])
+    }
+  })
+
+  it('crosses exactly four times across the five worlds', () => {
+    const crossings = corners.filter((c, i) => i > 0 && c !== corners[i - 1])
+    expect(crossings).toHaveLength(4)
+  })
+
+  it('arcs highest exactly halfway across', () => {
+    // What makes the move read as flying rather than sliding along the floor.
+    expect(getFlightArc(0)).toBeCloseTo(FLIGHT_ARC, 10)
+    expect(getFlightArc(0.5)).toBeCloseTo(FLIGHT_ARC / 2, 10)
+  })
+
+  it('sits flat at either end, so holding a corner is never a hover', () => {
+    expect(getFlightArc(1)).toBe(0)
+    expect(getFlightArc(-1)).toBe(0)
+  })
+
+  it('lifts while crossing rather than dropping', () => {
+    // The arc has to move it away from the chrome along the bottom, never into.
+    const held = projectRobot(50, 16 / 9, { side: 1 })
+    const midFlight = projectRobot(50, 16 / 9, { side: 0 })
+    expect(midFlight.ndcY).toBeGreaterThan(held.ndcY)
+  })
+
+  it('passes through the middle of the screen on the way', () => {
+    expect(projectRobot(50, 16 / 9, { side: 0 }).ndcX).toBeCloseTo(0, 10)
+  })
+})
+
+describe('it drifts while it waits', () => {
+  /*
+    The difference between a character standing by and an ornament stuck to the
+    glass. Bounded hard, because it runs for 45 minutes in the corner of
+    everyone's eye.
+  */
+  it('stays within its unit range for a whole lesson', () => {
+    for (let t = 0; t < 2700; t += 0.37) {
+      const drift = getRobotDrift(t)
+      expect(Math.abs(drift.x)).toBeLessThanOrEqual(1)
+      expect(Math.abs(drift.y)).toBeLessThanOrEqual(1)
+    }
+  })
+
+  it('actually moves, on both axes', () => {
+    const xs = new Set()
+    const ys = new Set()
+    for (let t = 0; t < 60; t += 1) {
+      const d = getRobotDrift(t)
+      xs.add(Math.round(d.x * 100))
+      ys.add(Math.round(d.y * 100))
+    }
+    expect(xs.size).toBeGreaterThan(20)
+    expect(ys.size).toBeGreaterThan(20)
+  })
+
+  it('does not trace the same path on both axes', () => {
+    // Matched frequencies would slide it along a diagonal, which reads as a
+    // mechanism rather than as drifting.
+    for (let t = 1; t < 40; t += 1) {
+      const d = getRobotDrift(t)
+      expect(Math.abs(d.x - d.y)).toBeGreaterThan(1e-6)
+    }
+  })
+
+  it('is deterministic, so a rehearsal predicts the day', () => {
+    expect(getRobotDrift(12.5)).toEqual(getRobotDrift(12.5))
+  })
+
+  it('stays small enough to be noticed only when looked at', () => {
+    expect(DRIFT_X).toBeLessThan(0.1)
+    expect(DRIFT_Y).toBeLessThan(0.1)
+  })
+})
+
+describe('reduced motion stops all of it', () => {
+  const robot = readFileSync(
+    fileURLToPath(
+      new URL('../components/three/PresentationRobot.tsx', import.meta.url),
+    ),
+    'utf8',
+  )
+
+  it('skips the drift entirely rather than damping it', () => {
+    expect(robot).toContain('reducedMotion ? undefined : getRobotDrift')
+  })
+
+  it('snaps to the corner instead of crossing', () => {
+    const branch = robot.slice(
+      robot.indexOf('if (quality.reducedMotion)'),
+      robot.indexOf('} else {'),
+    )
+    expect(branch.length).toBeGreaterThan(40)
+    expect(branch).toContain('side.current = targetSide')
+  })
+})
+
+describe('the orbit rings actually orbit', () => {
+  /*
+    They never did. A torus lies in the XY plane with its axis along Z, so
+    turning it about its own Z turns it about its own axis of symmetry — real in
+    the matrix, invisible on screen. The default XYZ Euler order applies that Z
+    rotation first, so the static tilt could not rescue it either. The fix spins
+    a parent group about Y and leaves the tilt on the mesh.
+  */
+  const character = readFileSync(
+    fileURLToPath(
+      new URL('../components/three/AICharacter.tsx', import.meta.url),
+    ),
+    'utf8',
+  )
+
+  it('no longer spins a torus about its own axis', () => {
+    expect(character).not.toMatch(/ring[AB]Ref\.current\.rotation\.z\s*[+-]=/)
+  })
+
+  it('spins the parent groups instead, in opposite directions', () => {
+    expect(character).toMatch(/spinARef\.current\.rotation\.y\s*\+=/)
+    expect(character).toMatch(/spinBRef\.current\.rotation\.y\s*-=/)
+  })
+
+  it('keeps the tilt on the mesh, which is where it shows', () => {
+    expect(character).toContain('rotation={[Math.PI / 2.6, 0.3, 0]}')
   })
 })

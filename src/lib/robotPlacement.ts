@@ -67,6 +67,62 @@ const CORNER_SIGN: Record<RobotCorner, number> = {
   'bottom-left': -1,
 }
 
+/** +1 for the right-hand corner, −1 for the left. */
+export function cornerSide(corner: RobotCorner = 'bottom-right'): number {
+  return CORNER_SIGN[corner]
+}
+
+/**
+ * Which corner a world's scenes use.
+ *
+ * Alternating by world means the companion crosses the screen exactly four
+ * times in the whole lesson — once per world change — rather than hopping
+ * about at random. Rare enough to read as an event, and it always coincides
+ * with the moment the class is being taken somewhere new.
+ */
+export function cornerForWorld(order: number): RobotCorner {
+  return order % 2 === 1 ? 'bottom-right' : 'bottom-left'
+}
+
+/**
+ * How far the companion drifts while it is holding a corner, as a fraction of
+ * the half-frame.
+ *
+ * Small on purpose. This is the difference between a character waiting and an
+ * ornament stuck to the glass, and it stops there — anything larger and the
+ * corner of the eye starts reporting movement while the presenter is talking.
+ */
+export const DRIFT_X = 0.05
+export const DRIFT_Y = 0.035
+
+/** Peak lift of the arc while crossing between corners. */
+export const FLIGHT_ARC = 0.22
+
+/**
+ * The idle wander, as unit values in −1 … 1.
+ *
+ * Two sines at unrelated frequencies, so the path never visibly repeats. Pure
+ * and time-based rather than random, so it is identical in rehearsal and on
+ * the day — the same reason everything else in this deck is seeded.
+ */
+export function getRobotDrift(timeSec: number): { x: number; y: number } {
+  return {
+    x: Math.sin(timeSec * 0.31),
+    y: Math.sin(timeSec * 0.47 + 1.3),
+  }
+}
+
+/**
+ * Height of the arc at a given point of a crossing.
+ *
+ * `side` runs from one corner to the other through zero, so this peaks exactly
+ * halfway: the companion lifts as it leaves, and settles as it arrives. It is
+ * what makes the move read as flying rather than sliding along the floor.
+ */
+export function getFlightArc(side: number): number {
+  return Math.max(0, 1 - Math.abs(side)) * FLIGHT_ARC
+}
+
 export interface RobotPlacement {
   /** Camera-space offsets, in world units. */
   x: number
@@ -81,20 +137,32 @@ export interface RobotPlacement {
  * The caller applies these relative to the camera's own transform, which is
  * what keeps the companion pinned to the frame while the world slides past.
  */
+export interface RobotMotion {
+  /** −1 … 1. Between the two corners; intermediate values are mid-flight. */
+  side: number
+  scaleMultiplier?: number
+  /** Unit drift from getRobotDrift. Omit for none. */
+  drift?: { x: number; y: number }
+}
+
 export function getRobotPlacement(
   fov: number,
   aspect: number,
-  corner: RobotCorner = 'bottom-right',
-  scaleMultiplier = 1,
+  motion: RobotMotion,
 ): RobotPlacement {
   const halfHeight = Math.tan((fov * Math.PI) / 360) * ROBOT_DISTANCE
   const halfWidth = halfHeight * aspect
+  const drift = motion.drift ?? { x: 0, y: 0 }
 
   return {
-    x: halfWidth * INSET_X * CORNER_SIGN[corner],
-    y: -halfHeight * INSET_Y,
+    x: halfWidth * (INSET_X * motion.side + DRIFT_X * drift.x),
+    // The arc lifts, so it always moves the companion away from the chrome
+    // along the bottom rather than toward it.
+    y:
+      halfHeight *
+      (-INSET_Y + DRIFT_Y * drift.y + getFlightArc(motion.side)),
     z: -ROBOT_DISTANCE,
-    scale: halfHeight * HEIGHT_FRACTION * scaleMultiplier,
+    scale: halfHeight * HEIGHT_FRACTION * (motion.scaleMultiplier ?? 1),
   }
 }
 
@@ -107,10 +175,9 @@ export function getRobotPlacement(
 export function projectRobot(
   fov: number,
   aspect: number,
-  corner: RobotCorner = 'bottom-right',
-  scaleMultiplier = 1,
+  motion: RobotMotion = { side: 1 },
 ): { ndcX: number; ndcY: number; ndcHeight: number } {
-  const placement = getRobotPlacement(fov, aspect, corner, scaleMultiplier)
+  const placement = getRobotPlacement(fov, aspect, motion)
   const halfHeight = Math.tan((fov * Math.PI) / 360) * ROBOT_DISTANCE
 
   return {
