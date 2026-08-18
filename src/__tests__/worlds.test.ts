@@ -275,3 +275,58 @@ describe('World 2 shape', () => {
     ).toBe(false)
   })
 })
+
+/**
+ * The accent light has to travel with the scene.
+ *
+ * It is what carries each world's colour, and it spent the whole project at a
+ * fixed world position with a 30-unit falloff while the environments run out to
+ * x = 110 — so for 23 of the 33 scenes it lit nothing. Rendered inside the
+ * anchor group its position is local and it follows the scene, which is what its
+ * comment always claimed.
+ *
+ * The reverse mistake is worse and is guarded too: a *directional* light shines
+ * toward its target, and the target defaults to the world origin, so moving one
+ * into the group would swing its direction to almost entirely −X and light every
+ * distant world edge-on.
+ */
+describe('the accent light travels with the scene', () => {
+  const read = (relative: string) =>
+    readFileSync(
+      fileURLToPath(new URL(`../components/${relative}`, import.meta.url)),
+      'utf8',
+    )
+
+  const lighting = read('three/Lighting.tsx')
+  const canvas = read('three/ExperienceCanvas.tsx')
+
+  it('keeps the point light out of the fixed rig', () => {
+    const rig = lighting.slice(
+      lighting.indexOf('export function Lighting'),
+      lighting.indexOf('export function AccentLight'),
+    )
+    expect(rig).not.toContain('pointLight')
+    expect(rig.length).toBeGreaterThan(100)
+  })
+
+  it('keeps the directional lights in the fixed rig', () => {
+    const accent = lighting.slice(lighting.indexOf('export function AccentLight'))
+    expect(accent).not.toContain('directionalLight')
+    expect(lighting).toContain('directionalLight')
+  })
+
+  it('renders the accent light inside the anchor group', () => {
+    const group = canvas.slice(
+      canvas.indexOf('<group position={getCameraPose'),
+      canvas.indexOf('</group>'),
+    )
+    expect(group).toContain('<AccentLight')
+  })
+
+  it('does not leave an accent outside the group as well', () => {
+    // Two accent lights would double the intensity in whichever world happened
+    // to be near the origin.
+    expect(canvas.match(/<AccentLight/g)).toHaveLength(1)
+    expect(canvas).toContain('<Lighting quality={quality} />')
+  })
+})

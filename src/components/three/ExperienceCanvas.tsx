@@ -2,7 +2,7 @@ import { createElement, useMemo, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { CameraController } from '@/components/three/CameraController'
 import { CanvasErrorBoundary } from '@/components/three/CanvasErrorBoundary'
-import { Lighting } from '@/components/three/Lighting'
+import { AccentLight, Lighting } from '@/components/three/Lighting'
 import {
   PerfMeter,
   PerfReadout,
@@ -69,7 +69,7 @@ export function ExperienceCanvas({ demoEmotion }: ExperienceCanvasProps = {}) {
           }}
         >
           <CameraController quality={quality} />
-          <Lighting quality={quality} accent={accent} />
+          <Lighting quality={quality} />
           {/*
             Worlds are authored around their own local origin; this anchors them
             at the scene's camera target so each one sits in its own part of the
@@ -81,6 +81,11 @@ export function ExperienceCanvas({ demoEmotion }: ExperienceCanvasProps = {}) {
             reads to the linter as building a component during render.
           */}
           <group position={getCameraPose(scene.scene3d).target}>
+            {/* Inside the group on purpose: a point light is positional, and
+                out here its 30-unit falloff never reached the three worlds
+                past x = 48. See Lighting.tsx. */}
+            <AccentLight accent={accent} />
+
             {createElement(getScene3DComponent(scene.scene3d), {
               scene3d: scene.scene3d,
               quality,
