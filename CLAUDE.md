@@ -206,15 +206,39 @@ humanoid.
 "أنا موجود لأساعدك" — never "أنا أفضل صديق إلك". The presentation itself
 teaches AI boundaries, so the character has to model them.
 
+### Where NOVA appears
+
+Amended 2026-08-18. NOVA used to be per-scene opt-in and in practice appeared
+nowhere. It now **accompanies the class through the lesson**, anchored to the
+corner of the frame.
+
+- Behaviour is data, keyed by scene id, in `src/lib/robotBehavior.ts`. One
+  expression per scene, switched on navigation and nothing else. A companion
+  that shifts on every beat moves while the presenter is mid-sentence.
+- **Hidden on every `statementReveal` scene.** Those five are built around a
+  clean screen and a silence the presenter controls. A test derives that list
+  from the deck, so a sixth such scene cannot quietly acquire a mascot.
+- It is anchored to the camera, never to the world, and sized as a fraction of
+  the frame so an easing fov does not change how big it looks.
+- The character rule above is enforced in the mapping, not left to taste:
+  NOVA is merely curious about whether an AI is your friend, and never looks
+  disappointed at a student who does not use AI.
+
 ---
 
 ## 3D RULE
 
 3D explains concepts; it does not decorate.
 
-- Bad: a spinning 3D robot next to some text.
+- Bad: incidental 3D that illustrates nothing.
 - Good: private information physically tries to enter the AI vault and is
   blocked by the barrier.
+
+**One deliberate exception: NOVA.** A recurring character that travels with the
+class is not decoration — it is continuity, and the presentation is 45 minutes
+long. The exception is bounded by the rules in the NOVA section above, and it
+is an exception of exactly one. Nothing else earns a place on screen without
+explaining something.
 
 ---
 

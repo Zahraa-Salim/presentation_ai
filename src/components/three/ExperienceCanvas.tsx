@@ -8,6 +8,7 @@ import {
   PerfReadout,
   type PerfSample,
 } from '@/components/three/PerfMeter'
+import { PresentationRobot } from '@/components/three/PresentationRobot'
 import { getScene3DComponent } from '@/components/three/sceneRegistry'
 import { usePresentation } from '@/hooks/usePresentation'
 import { useQualityTier } from '@/hooks/useQualityTier'
@@ -100,6 +101,14 @@ export function ExperienceCanvas({ demoEmotion }: ExperienceCanvasProps = {}) {
               ]}
             />
           )}
+          {/*
+            NOVA rides the corner of the frame for the whole lesson. Anchored to
+            the camera rather than to the world, so it stays put while the world
+            slides past — see PresentationRobot. Behaviour is data keyed by
+            scene id; this places it and nothing more.
+          */}
+          <PresentationRobot quality={quality} accent={accent} />
+
           {showPerf && (
             <PerfMeter
               quality={quality}

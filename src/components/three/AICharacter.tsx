@@ -17,6 +17,18 @@ interface AICharacterProps {
   accent: string
   position?: [number, number, number]
   scale?: number
+  /**
+   * Overrides the tier's decision about the mote field. The companion in the
+   * corner of the frame is thumbnail-sized, so motes there spend a draw call on
+   * something nobody can resolve; NOVA as the subject of a scene keeps them.
+   */
+  motes?: boolean
+  /**
+   * Multiplier on everything that emits light. 1 leaves the character exactly
+   * as designed; the companion in the corner passes more, to compensate for the
+   * scrim veiling the canvas but not the DOM above it. See SCRIM_COMPENSATION.
+   */
+  brightness?: number
 }
 
 /** Frame-rate independent easing toward a target. */
@@ -41,6 +53,8 @@ export function AICharacter({
   accent,
   position = [0, 0, 0],
   scale = 1,
+  motes,
+  brightness = 1,
 }: AICharacterProps) {
   const groupRef = useRef<Group>(null)
   const coreRef = useRef<Mesh>(null)
@@ -125,7 +139,8 @@ export function AICharacter({
     if (coreRef.current) {
       const material = coreRef.current.material as MeshStandardMaterial
       material.emissiveIntensity =
-        c.pulse * (0.9 + Math.sin(clock.current * 2.4) * 0.1) + flare * 1.8
+        (c.pulse * (0.9 + Math.sin(clock.current * 2.4) * 0.1) + flare * 1.8) *
+        brightness
     }
 
     // ---- rings ----------------------------------------------------------
@@ -142,9 +157,13 @@ export function AICharacter({
     }
   })
 
+  /* Clamped: a multiplier must never push an opacity past 1, which would be
+     invalid rather than merely bright. */
+  const lit = (opacity: number) => Math.min(1, opacity * brightness)
+
   const showGlow = quality.tier !== 'low'
   const showSecondRing = quality.tier !== 'low'
-  const showMotes = quality.tier === 'high'
+  const showMotes = motes ?? quality.tier === 'high'
 
   return (
     <group ref={groupRef} position={position} scale={scale}>
@@ -167,7 +186,7 @@ export function AICharacter({
           <meshBasicMaterial
             color={hue}
             transparent
-            opacity={0.14}
+            opacity={lit(0.14)}
             blending={AdditiveBlending}
             depthWrite={false}
           />
@@ -181,7 +200,7 @@ export function AICharacter({
       </mesh>
       <mesh position={[0, 0.06, 0.44]}>
         <circleGeometry args={[0.23, 24]} />
-        <meshBasicMaterial color={hue} transparent opacity={0.85} />
+        <meshBasicMaterial color={hue} transparent opacity={lit(0.85)} />
       </mesh>
 
       {/* orbit rings */}
@@ -190,7 +209,7 @@ export function AICharacter({
         <meshBasicMaterial
           color={hue}
           transparent
-          opacity={0.7}
+          opacity={lit(0.7)}
           blending={AdditiveBlending}
           depthWrite={false}
         />
@@ -202,7 +221,7 @@ export function AICharacter({
           <meshBasicMaterial
             color={hue}
             transparent
-            opacity={0.45}
+            opacity={lit(0.45)}
             blending={AdditiveBlending}
             depthWrite={false}
           />
