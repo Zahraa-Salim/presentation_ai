@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Built by `npm run kit` — a copy of dist/ plus the server, for a USB stick.
+presentation-kit

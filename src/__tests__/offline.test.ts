@@ -121,6 +121,46 @@ describe('the standalone server stays standalone', () => {
   })
 })
 
+/**
+ * The kit script assembles what goes on the USB stick. It runs on this machine
+ * rather than the target one, so a dependency here would not fail on the day —
+ * but it would mean the kit could only ever be built from a full checkout with
+ * node_modules intact, which is the fragility the kit exists to escape.
+ */
+describe('the kit is assembled without dependencies too', () => {
+  const script = readFileSync(
+    fileURLToPath(new URL('../../scripts/make-kit.mjs', import.meta.url)),
+    'utf8',
+  )
+
+  const imports = [...script.matchAll(/from\s+'([^']+)'/g)].map((m) => m[1])
+
+  it('imports something, so this is not passing vacuously', () => {
+    expect(imports.length).toBeGreaterThan(0)
+  })
+
+  it.each([...new Set(imports)].map((s) => [s]))(
+    'imports %s, which is a Node builtin',
+    (specifier) => {
+      expect(specifier.startsWith('node:')).toBe(true)
+    },
+  )
+
+  it('refuses to assemble a kit around a build that is not there', () => {
+    // Shipping an empty dist/ to a classroom would look like a broken app.
+    expect(script).toContain('npm run build')
+  })
+
+  it('ships the server beside the build, not just the build', () => {
+    expect(script).toContain('serve.mjs')
+  })
+
+  it('tells the reader not to double-click index.html', () => {
+    // The single most likely way for this to fail in someone else's hands.
+    expect(script).toContain('Do NOT double-click index.html')
+  })
+})
+
 describe('no third-party endpoint is referenced', () => {
   /* Namespace URIs and repository metadata are inert strings. What must not
      appear is somewhere this app would actually talk to. */

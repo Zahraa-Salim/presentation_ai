@@ -1,6 +1,6 @@
 # PROJECT STATUS — Interactive AI Education Experience
 
-**Last updated:** 2026-08-18 — **ready for the rehearsal**
+**Last updated:** 2026-08-18 — **finished; packaged to run on any laptop**
 **Project:** 45-minute Arabic-first interactive AI lesson for Grade 11, Lebanon
 **Core message:** خلي AI يساعدك، مش يفكّر بدالك.
 
@@ -59,12 +59,12 @@ remains is a timed rehearsal, whatever polish it surfaces, and deployment.
 | Runtime budget | exactly 2700s = 45.0 min |
 | 3D worlds built | **all 11** — no scene renders a placeholder |
 | Interactions built | **all 9** |
-| **Tests** | **571 passing, 17 files, in-repo (Vitest)** |
+| **Tests** | **701 passing, 18 files, in-repo (Vitest)** |
 | Content gaps (`⟦TODO⟧`) | **0** (was 85) |
 | Bundle | entry 277.08 kB (gzip 85.14) · three 887.76 · motion 128.66 · 1.6 MB total |
 
 Gates all green: `typecheck` 0 errors · `lint` 0 errors · `build` succeeds ·
-`test` 571/571.
+`test` 701/701.
 
 Between scenes 32 and 33 sits the **coda** — the deck's five core rules, reached
 by pressing on from the careers scene. It is deliberately not a 34th scene;
@@ -357,13 +357,17 @@ screen. Two exceptions remain, each with a written reason — `مين الحقي
 ## 8. HOW TO RUN
 
 ```bash
+npm run present     # build, then serve it — this is how you present
+npm run kit         # build, then assemble the USB-stick folder
+npm run serve       # serve an existing build, without rebuilding
+
 npm run dev         # dev server → http://localhost:5173
-npm test            # 236 Vitest tests (run once)
+npm test            # 701 Vitest tests (run once)
 npm run test:watch  # watch mode while editing
 npm run typecheck   # tsc -b
 npm run lint        # eslint
 npm run build       # tsc -b && vite build
-npm run preview     # serve the production build locally
+npm run preview     # Vite's own preview server
 ```
 
 **URL options:** `?quality=low|medium|high` forces the render tier ·
@@ -515,8 +519,27 @@ is present rather than serving an empty page.
 `offline.test.ts` asserts every one of its imports is a `node:` builtin, so the
 zero-dependency promise cannot quietly lapse.
 
-**The portable kit is `dist/` + `serve.mjs`.** Copy those two onto a stick and
-any machine with Node runs the presentation offline.
+### The portable kit
+
+```bash
+npm run kit
+```
+
+Builds, then assembles `presentation-kit/` — **1.5 MB, three things**:
+
+| | |
+|---|---|
+| `dist/` | the built presentation |
+| `serve.mjs` | the server, no dependencies |
+| `اقرأني — READ ME.txt` | bilingual instructions, keyboard map, and what to do when it goes wrong |
+
+Copy that folder to a USB stick. On the target laptop: `node serve.mjs`, then
+open `http://127.0.0.1:4173`. **Node is the only requirement.** No checkout, no
+`node_modules`, no `npm install`, no network.
+
+Verified 2026-08-18 by running the server from inside the kit folder alone:
+index, favicon, all four JS chunks, the stylesheet, all five fonts and a deep
+link every returned 200.
 
 ### What was checked
 
