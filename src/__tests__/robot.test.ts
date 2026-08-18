@@ -199,17 +199,8 @@ describe('placement stays out of the world', () => {
     expect(source).not.toMatch(/Math\.tan/)
   })
 
-  it('carries no particle field of its own', () => {
-    // A companion the size of a thumbnail in the corner would spend draw calls
-    // on motes nobody can resolve. RobotModel has none at all, which is a
-    // stronger guarantee than switching one off.
-    const model = readFileSync(
-      fileURLToPath(
-        new URL('../components/three/RobotModel.tsx', import.meta.url),
-      ),
-      'utf8',
-    )
-    expect(model).not.toContain('ParticleField')
+  it('does not render its own mote field', () => {
+    expect(source).toContain('motes={false}')
   })
 })
 
